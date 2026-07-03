@@ -7,7 +7,11 @@ namespace OmiLAXR.Components
     [RequireComponent(typeof(Collider))]
     public class Area : MonoBehaviour
     {
+#if UNITY_6000_5_OR_NEWER
+        private readonly Dictionary<EntityId, bool> _insideObjects = new Dictionary<EntityId, bool>();
+#else 
         private Dictionary<int, bool> _insideObjects = new Dictionary<int, bool>();
+#endif
         private Collider _collider;
         // public SnapshotCamera snapshotCamera;
 
@@ -32,7 +36,11 @@ namespace OmiLAXR.Components
                 return;
             var point = t.position;
             var isInside = IsInside(point);
+#if UNITY_6000_5_OR_NEWER
+            var instanceId = t.gameObject.GetEntityId();
+#else
             var instanceId = transform.GetInstanceID();
+#endif
             var keyExists = _insideObjects.ContainsKey(instanceId);
             var v = keyExists && _insideObjects[instanceId];
             if (isInside)
