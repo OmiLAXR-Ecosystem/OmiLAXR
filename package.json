@@ -1,6 +1,6 @@
 {
   "name": "com.rwth.unity.omilaxr",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "displayName": "OmiLAXR",
   "description": "This is the base package for OmiLAXR ecosystem. This package has shareable code for all OmiLAXR packages.",
   "unity": "2020.3",

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.2.5] - 2026-11-09
+
+### Changed
+- Updated package version metadata.
+
 ## [2.2.4] - 2026-07-03
 
 ### Fixed

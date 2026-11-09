@@ -2,8 +2,8 @@
 message: "If you use this software, please cite it using the metadata below."
 type: software
 title: "OmiLAXR"
-version: "2.2.0"
-date-released: 2025-08-17
+version: "2.2.5"
+date-released: 2026-11-09
 repository-code: "https://github.com/SGoerzen/OmiLAXR"
 url: "https://omilaxr.dev/"
 license: "AGPL-3.0-or-later"
@@ -27,8 +27,8 @@ keywords:
 preferred-citation:
   type: software
   title: "OmiLAXR"
-  version: "2.2.0"
-  date-released: 2025-08-17
+  version: "2.2.5"
+  date-released: 2026-11-09
   url: "https://omilaxr.dev/"
   authors:
     - given-names: "Sergej"
