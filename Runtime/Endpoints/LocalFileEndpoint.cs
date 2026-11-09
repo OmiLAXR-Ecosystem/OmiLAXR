@@ -111,7 +111,7 @@ namespace OmiLAXR.Endpoints
                     identifier = "{yyyyMMddHHmmss}";
 
                 // Process timestamp formatting and cache result
-                return _resolvedIdentifier = IsInTimeFormat(identifier) ? GenerateIdentifier(DateTime.Now) : identifier;
+                return _resolvedIdentifier = IsInTimeFormat(identifier) ? GenerateIdentifier(Clock.Now) : identifier;
             }
         }
         
@@ -199,8 +199,8 @@ namespace OmiLAXR.Endpoints
             var folder = Path.Combine(GetResolvedFolder(), statementsFolder);
             
             // Ensure the directory exists
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
+            if (!FileSystem.Current.DirectoryExists(folder))
+                FileSystem.Current.CreateDirectory(folder);
 
             // Create the complete file name with identifier and extension
             var n = $"{ResolvedIdentifier}.{GetExtension()}";
@@ -235,8 +235,8 @@ namespace OmiLAXR.Endpoints
             
             // Create subfolder for this session's per-composer files
             var folder = Path.Combine(ResolvedStatementsFolderPath, ResolvedIdentifier);
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
+            if (!FileSystem.Current.DirectoryExists(folder))
+                FileSystem.Current.CreateDirectory(folder);
             
             // Generate unique file path for this composer
             var filePath = Path.Combine(folder, composerName + "." + GetExtension());

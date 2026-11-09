@@ -144,7 +144,7 @@ namespace OmiLAXR.Endpoints
             return new CsvBuffer
             {
                 CsvFormat = GetDefaultCsvFormat(),
-                HeaderWriter = new StreamWriter(filePath) { AutoFlush = false },    // Header file stream
+                HeaderWriter = new StreamWriter(FileSystem.Current.OpenWrite(filePath, append: false)) { AutoFlush = false },    // Header file stream
                 LastHeaderCount = 0,                                                // No headers written initially
                 FilePath = filePath                                                 // Main file path for assembly
             };
@@ -229,14 +229,14 @@ namespace OmiLAXR.Endpoints
                 
                 // Merge header file and data file into final CSV
                 // Headers are written first, followed by all data rows
-                using (var targetStream = new FileStream(mainFilePath, FileMode.Append, FileAccess.Write, FileShare.None))
-                using (var sourceStream = new FileStream(dataFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var targetStream = FileSystem.Current.OpenWrite(mainFilePath, append: true))
+                using (var sourceStream = FileSystem.Current.OpenRead(dataFilePath))
                 {
                     sourceStream.CopyTo(targetStream);  // Efficiently copy data file content
                 }
                 
                 // Clean up temporary data file
-                File.Delete(dataFilePath);
+                FileSystem.Current.DeleteFile(dataFilePath);
             }
         }
 

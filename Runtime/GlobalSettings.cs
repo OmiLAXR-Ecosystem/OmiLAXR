@@ -18,7 +18,7 @@ namespace OmiLAXR
     [DefaultExecutionOrder(-99999999)] // Execute as early as possible
     [DisallowMultipleComponent] // Enforce singleton pattern at component level
     [AddComponentMenu("OmiLAXR / Global Settings")]
-    public sealed class GlobalSettings : PipelineComponent
+    public sealed class GlobalSettings : PipelineComponent, Context.ITrackingNameSettings
     {
         /// <summary>
         /// Cached singleton instance for fast access across the system.
@@ -58,6 +58,8 @@ namespace OmiLAXR
         /// </summary>
         [Tooltip("Whether the tracked name is by default the object name or the full name path to the object in hierarchy. This option is not applied if a [CustomTrackingName] component is attached.")]
         public TrackingNameBehaviour trackingNameBehaviour = TrackingNameBehaviour.ObjectName;
+
+        TrackingNameBehaviour Context.ITrackingNameSettings.TrackingNameBehaviour => trackingNameBehaviour;
 
         /// <summary>
         /// Enumeration defining different strategies for resolving object names in tracking contexts.

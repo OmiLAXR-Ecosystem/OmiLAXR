@@ -3,15 +3,27 @@
 * Copyright (C) 2025 Sergej Görzen <sergej.goerzen@gmail.com>
 * This file is part of OmiLAXR.
 */
+using System.Collections.Generic;
 using OmiLAXR.Composers;
 
 namespace OmiLAXR.Endpoints
 {
     /// <summary>
-    /// Defines the contract for statement transfer endpoints.
-    /// Provides methods for managing statement sending lifecycle.
+    /// Receives statements, e.g. to queue them for sending. This is all a <see cref="DataProvider"/> needs from an endpoint.
     /// </summary>
-    public interface IEndpoint
+    public interface IStatementSink
+    {
+        /// <summary>
+        /// Adds a single statement to the sending queue.
+        /// </summary>
+        /// <param name="statement">The statement to be sent</param>
+        void SendStatement(IStatement statement);
+    }
+
+    /// <summary>
+    /// Start/pause/stop control of a sending process.
+    /// </summary>
+    public interface ISendingLifecycle
     {
         /// <summary>
         /// Indicates whether the endpoint is currently in the process of sending statements.
@@ -38,11 +50,21 @@ namespace OmiLAXR.Endpoints
         /// Completely stops the statement sending process.
         /// </summary>
         void StopSending();
+    }
 
-        /// <summary>
-        /// Adds a single statement to the sending queue.
-        /// </summary>
-        /// <param name="statement">The statement to be sent</param>
-        void SendStatement(IStatement statement);
+    /// <summary>
+    /// Synchronously transfers a batch of statements to its destination (file, LRS, ...).
+    /// </summary>
+    public interface IStatementTransport
+    {
+        TransferCode Send(IReadOnlyList<IStatement> batch);
+    }
+
+    /// <summary>
+    /// Defines the contract for statement transfer endpoints.
+    /// Provides methods for managing statement sending lifecycle.
+    /// </summary>
+    public interface IEndpoint : IStatementSink, ISendingLifecycle
+    {
     }
 }

@@ -7,6 +7,7 @@ using System;
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Scripting;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.TrackingBehaviours.System
 {
@@ -61,7 +62,7 @@ namespace OmiLAXR.TrackingBehaviours.System
             [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
             private static void GameStarted()
             {
-                StartTime = DateTime.Now;
+                StartTime = Clock.Now;
             }
         }
 
@@ -80,7 +81,7 @@ namespace OmiLAXR.TrackingBehaviours.System
                 return;
             
             // Use captured start time or current time as fallback
-            var now = SystemStartController.StartTime.HasValue ? SystemStartController.StartTime.Value : DateTime.Now;
+            var now = SystemStartController.StartTime.HasValue ? SystemStartController.StartTime.Value : Clock.Now;
             OnStartedGame?.Invoke(this, now);
             _sendStartSignal = true;
         }
@@ -111,7 +112,7 @@ namespace OmiLAXR.TrackingBehaviours.System
         private void TriggerEnd()
         {
             if (!_isRunning) return;
-            OnQuitGame.Invoke(this, DateTime.Now);
+            OnQuitGame.Invoke(this, Clock.Now);
             _isRunning = false;
         }
         
@@ -124,7 +125,7 @@ namespace OmiLAXR.TrackingBehaviours.System
         {
             if (!enabled)
                 return;
-            OnFocusedGame?.Invoke(this, DateTime.Now, hasFocus);
+            OnFocusedGame?.Invoke(this, Clock.Now, hasFocus);
         }
 
         /// <summary>
@@ -143,7 +144,7 @@ namespace OmiLAXR.TrackingBehaviours.System
                 _isFirstRun = false;
                 return;
             }
-            OnPausedGame?.Invoke(this, DateTime.Now, pauseStatus);
+            OnPausedGame?.Invoke(this, Clock.Now, pauseStatus);
         }
     }
 }

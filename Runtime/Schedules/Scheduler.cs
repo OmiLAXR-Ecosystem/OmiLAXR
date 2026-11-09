@@ -15,7 +15,7 @@ namespace OmiLAXR.Schedules
     /// Combines tick-based and event-driven scheduling.
     /// Use Init(...) for runtime initialization.
     /// </summary>
-    public abstract class Scheduler : ScriptableObject, ISerializationCallbackReceiver
+    public abstract class Scheduler : ScriptableObject, ITicker, ISerializationCallbackReceiver
     {
         [Header("Scheduler Configuration")]
         [Tooltip("Shows that the Scheduler is active.")]

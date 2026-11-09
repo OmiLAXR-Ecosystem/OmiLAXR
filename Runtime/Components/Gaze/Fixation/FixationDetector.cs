@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.Components.Gaze.Fixation
 {
@@ -88,7 +89,7 @@ namespace OmiLAXR.Components.Gaze.Fixation
             {
                 if (isNewFixation)
                 {
-                    CurrentFixationStart = DateTime.Now;
+                    CurrentFixationStart = Clock.Now;
                     CurrentFixationEnd = null;
                     _currentTarget = hit.RayHit.collider.gameObject;
                     var fixationData = GenerateFixationData(hit);
@@ -105,7 +106,7 @@ namespace OmiLAXR.Components.Gaze.Fixation
             fixationLogic?.ResetLogic();
             if (_currentTarget != null)            // <-- end only if we were fixating
             {
-                CurrentFixationEnd = DateTime.Now;
+                CurrentFixationEnd = Clock.Now;
                 OnFixationEnded?.Invoke(hit, GenerateFixationData(hit));
                 _currentTarget = null;             // <-- clear current target
             }

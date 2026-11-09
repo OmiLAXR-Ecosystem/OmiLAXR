@@ -6,6 +6,7 @@
 using System;
 using System.ComponentModel;
 using UnityEngine;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.TrackingBehaviours.Learner
 {
@@ -38,7 +39,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner
         protected override void BeforeStartedPipeline(Pipeline pipeline)
         {
             if (_isRunning) return;
-            OnSessionStarted.Invoke(this, DateTime.Now);
+            OnSessionStarted.Invoke(this, Clock.Now);
             _isRunning = true;
         }
 
@@ -56,7 +57,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner
         private void TriggerEnd()
         {
             if (!_isRunning) return;
-            OnSessionStopped.Invoke(this, DateTime.Now);
+            OnSessionStopped.Invoke(this, Clock.Now);
             _isRunning = false;
         }
     }

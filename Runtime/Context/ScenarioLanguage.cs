@@ -15,7 +15,7 @@ namespace OmiLAXR.Context
     /// </summary>
     [AddComponentMenu("OmiLAXR / Scenario Context / Scenario Language")]
     [DisallowMultipleComponent]
-    public sealed class ScenarioLanguage : LearningContext
+    public sealed class ScenarioLanguage : LearningContext, ILanguageProvider
     {
         /// <summary>
         /// Static reference to the singleton instance.
@@ -34,5 +34,13 @@ namespace OmiLAXR.Context
         /// Used for localizing statement content and metadata.
         /// </summary>
         public Languages language = Languages.en;
+
+        /// <inheritdoc />
+        public string GetLanguageCode()
+        {
+            // Enum names of reserved words are prefixed with '_'
+            var code = language.ToString();
+            return code[0] == '_' ? code.Substring(1) : code;
+        }
     }
 }

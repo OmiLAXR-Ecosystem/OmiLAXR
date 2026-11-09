@@ -11,7 +11,7 @@ namespace OmiLAXR.Filters
     /// Abstract base class for pipeline filter components that process arrays of Unity Objects.
     /// Filters selectively include or exclude objects from tracking based on custom criteria.
     /// </summary>
-    public abstract class Filter : ActorPipelineComponent
+    public abstract class Filter : ActorPipelineComponent, IObjectFilter
     {
         /// <summary>
         /// Processes an array of Unity Objects and returns a filtered subset.

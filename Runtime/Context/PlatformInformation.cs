@@ -19,7 +19,7 @@ namespace OmiLAXR.Context
     [AddComponentMenu("OmiLAXR / Scenario Context / Platform Information")]
     [DisallowMultipleComponent]
     [Description("Provides platform information in following format [prefixes:]OmiLAXR.{MODULE}:{COMPOSER}:{VERSION}:{OS}[:suffixes].")]
-    public sealed class PlatformInformation : LearningContext
+    public sealed class PlatformInformation : LearningContext, IPlatformInfoProvider
     {
         /// <summary>
         /// Serializable data structure for storing custom prefixes and suffixes

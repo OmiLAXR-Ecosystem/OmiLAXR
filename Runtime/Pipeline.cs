@@ -25,7 +25,7 @@ namespace OmiLAXR
     /// </summary>
     [AddComponentMenu("OmiLAXR / Core / Pipeline")]
     [DefaultExecutionOrder(0)] // Execute at standard time, after extensions and settings
-    public class Pipeline : MonoBehaviour
+    public class Pipeline : MonoBehaviour, IPipelineEvents
     {
         /// <summary>
         /// Memory for holding running pipelines.
@@ -652,7 +652,7 @@ namespace OmiLAXR
             AfterFoundObjects?.Invoke(objects);
 
             // Apply all enabled filters in sequence to refine the object set
-            objects = Filters.Where(f => f.enabled).Aggregate(objects, (gos, filter) => filter.Pass(gos)) ?? Array.Empty<Object>();
+            objects = ObjectFilters.Apply(Filters, objects);
             
             // Notify subscribers about filtered objects
             AfterFilteredObjects?.Invoke(objects);

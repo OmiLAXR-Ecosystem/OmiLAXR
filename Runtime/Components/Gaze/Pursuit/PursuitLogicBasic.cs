@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.Components.Gaze.Pursuit
 {
@@ -129,7 +130,7 @@ namespace OmiLAXR.Components.Gaze.Pursuit
                 {
                     // Debug.Log($"[Pursuit BREAK] fast={tooFast}, inaccurate={tooInaccurate}, lost={lostTarget}, slow={targetTooSlow}, gainFail={gainOutOfBounds}, reversed={directionReversed}, timeout={timeoutReached}");
 
-                    var endUtc = DateTime.UtcNow;
+                    var endUtc = Clock.UtcNow;
                     var durationMs = (int)(_elapsedSec * 1000f);
 
                     if (durationMs >= minDurationMs && _samples >= 2)
@@ -166,7 +167,7 @@ namespace OmiLAXR.Components.Gaze.Pursuit
                 errorDeg <= maxStartErrorDeg)
             {
                 _inPursuit = true;
-                _startTimeUtc = DateTime.UtcNow;
+                _startTimeUtc = Clock.UtcNow;
                 _startHit = currentHit;
 
                 _sumEyeAngleDeg = 0f;

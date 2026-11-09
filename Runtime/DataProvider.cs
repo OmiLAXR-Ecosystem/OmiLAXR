@@ -49,6 +49,50 @@ namespace OmiLAXR
         /// Extensions that can add functionality to the DataProvider without modifying its core implementation.
         /// </summary>
         public readonly List<IDataProviderExtension> Extensions = new List<IDataProviderExtension>();
+
+        /// <summary>
+        /// All hooks statements pass through: <see cref="Hook"/> components in the hierarchy plus hooks added via <see cref="AddHook"/>.
+        /// </summary>
+        public readonly List<IStatementHook> StatementHooks = new List<IStatementHook>();
+
+        /// <summary>
+        /// All receivers of processed statements: endpoints in the hierarchy plus sinks added via <see cref="AddSink"/>.
+        /// </summary>
+        public readonly List<IStatementSink> StatementSinks = new List<IStatementSink>();
+
+        private readonly List<IStatementHook> _registeredHooks = new List<IStatementHook>();
+        private readonly List<IStatementSink> _registeredSinks = new List<IStatementSink>();
+
+        /// <summary>
+        /// Registers a hook that is not a component in this hierarchy (kept across re-enabling).
+        /// </summary>
+        public void AddHook(IStatementHook hook) => Register(_registeredHooks, StatementHooks, hook);
+
+        /// <summary>
+        /// Registers a statement receiver that is not a component in this hierarchy (kept across re-enabling).
+        /// </summary>
+        public void AddSink(IStatementSink sink) => Register(_registeredSinks, StatementSinks, sink);
+
+        private void Register<T>(List<T> registered, List<T> active, T item)
+        {
+            if (item == null || registered.Contains(item))
+                return;
+            registered.Add(item);
+            if (_isInit && !active.Contains(item))
+                active.Add(item);
+        }
+
+        private static void AddDistinct<T>(List<T> target, IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                if (!target.Contains(item))
+                    target.Add(item);
+            }
+        }
+
+        // Disabled components are skipped; plain C# hooks and sinks are always active
+        private static bool IsActive(object item) => !(item is Behaviour behaviour) || behaviour.enabled;
         
         /// <summary>
         /// Retrieves the first composer of the specified type.
@@ -83,6 +127,12 @@ namespace OmiLAXR
             
             // Find available data endpoints
             Endpoints.AddRange(GetComponentsInChildren<Endpoint>(true));
+
+            // Hooks and sinks used for routing, including registered non-component ones
+            AddDistinct(StatementHooks, GetComponentsInChildren<IStatementHook>(true));
+            AddDistinct(StatementHooks, _registeredHooks);
+            AddDistinct(StatementSinks, GetComponentsInChildren<IStatementSink>(true));
+            AddDistinct(StatementSinks, _registeredSinks);
             
             // Subscribe to each composer's AfterComposed event to process statements
             foreach (var composer in Composers)
@@ -112,6 +162,8 @@ namespace OmiLAXR
             Endpoints.Clear();
             HigherComposers.Clear();
             Hooks.Clear();
+            StatementHooks.Clear();
+            StatementSinks.Clear();
             _isInit = false;
         }
 
@@ -134,9 +186,9 @@ namespace OmiLAXR
             }
             
             // Then, pass through hooks for potential modification or filtering
-            foreach (var hook in Hooks)
+            foreach (var hook in StatementHooks)
             {
-                if (!hook.enabled)
+                if (!IsActive(hook))
                     continue;
                 statement = hook.AfterCompose(statement);
                 if (statement.IsDiscarded())
@@ -144,11 +196,11 @@ namespace OmiLAXR
             }
             
             // Finally, distribute to all endpoints
-            foreach (var dp in Endpoints)
+            foreach (var sink in StatementSinks)
             {
-                if (!dp.enabled)
+                if (!IsActive(sink))
                     continue;
-                dp.SendStatement(statement);
+                sink.SendStatement(statement);
             }
         }
 

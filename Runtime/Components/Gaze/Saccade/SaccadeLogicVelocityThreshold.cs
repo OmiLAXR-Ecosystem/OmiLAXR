@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.Components.Gaze.Saccade
 {
@@ -63,7 +64,7 @@ namespace OmiLAXR.Components.Gaze.Saccade
                     var amplitudeDeg = Vector3.Angle(_startDirection, currentDirection);
 
                     var endPoint = SafeHitPoint(currentHit);
-                    var endTime = DateTime.Now;
+                    var endTime = Clock.Now;
                     var duration = OmiLAXR.Types.Duration.FromMilliseconds(
                         (int)(endTime - _startWallClock).TotalMilliseconds
                     );
@@ -93,7 +94,7 @@ namespace OmiLAXR.Components.Gaze.Saccade
                     _startHit = previousHit;
                     _startPupilMm = pupilDiameterMillimeters;
                     _elapsedSeconds = 0f;
-                    _startWallClock = DateTime.Now;
+                    _startWallClock = Clock.Now;
 
                     // Optional: Start-Daten zurückgeben (für Streaming/Live-Protokoll)
                     isStart = true;

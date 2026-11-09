@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using OmiLAXR.Utils;
 
 namespace OmiLAXR.TrackingBehaviours.Learner.HeadTracking
 {
@@ -57,7 +58,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner.HeadTracking
         /// <summary>
         /// Gets current HMD position with timestamp. Returns default if no main camera exists.
         /// </summary>
-        public HmdTimedPosition GetHmdPosition() => _mMainCamera != null ? new HmdTimedPosition(DateTime.Now, _mMainCamera.transform.position) : default;
+        public HmdTimedPosition GetHmdPosition() => _mMainCamera != null ? new HmdTimedPosition(Clock.Now, _mMainCamera.transform.position) : default;
 
         /// <summary>
         /// Finds maximum or minimum position in list along specified axis.

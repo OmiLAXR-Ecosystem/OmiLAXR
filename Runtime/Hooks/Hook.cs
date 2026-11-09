@@ -14,7 +14,7 @@ namespace OmiLAXR.Hooks
     /// after they have been composed but before final processing by endpoints.
     /// Used for adding contextual information, applying business rules, or transforming statement data.
     /// </summary>
-    public abstract class Hook : PipelineComponent, IHook
+    public abstract class Hook : PipelineComponent, IStatementHook
     {
         /// <summary>
         /// Abstract method called after a statement has been composed.
@@ -34,7 +34,7 @@ namespace OmiLAXR.Hooks
         /// <param name="statement">The statement containing pipeline information to search</param>
         /// <param name="includeInactive">Whether to include disabled providers in the search</param>
         /// <returns>The first matching provider of the specified type, or null if not found</returns>
-        protected TS GetProvider<TS>(IStatement statement, bool includeInactive = false) where TS : ActorDataProvider
+        protected TS GetProvider<TS>(IStatementProvenance statement, bool includeInactive = false) where TS : ActorDataProvider
             => statement.GetSenderPipelineInfo().ActorDataProviders?
                 .FirstOrDefault(o => (includeInactive || o.enabled) && o is TS) as TS;
     }

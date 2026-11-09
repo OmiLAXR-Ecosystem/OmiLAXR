@@ -11,7 +11,7 @@ namespace OmiLAXR
     /// Provides automatic pipeline discovery through component hierarchy and extension system.
     /// Includes logging utilities with pipeline context information.
     /// </summary>
-    public abstract class ActorPipelineComponent : PipelineComponent
+    public abstract class ActorPipelineComponent : PipelineComponent, IActorProvider
     {
         /// <summary>
         /// Cached reference to the associated Pipeline component.

@@ -195,7 +195,7 @@ namespace OmiLAXR.Endpoints
         protected bool LoadFromFile(string filePath)
         {
             // Validate file existence before attempting to load
-            if (!File.Exists(filePath))
+            if (!FileSystem.Current.FileExists(filePath))
             {
                 DebugLog.OmiLAXR.Warning($"({GetType().Name}) No config at '{filePath}'.");
                 return false;
@@ -204,7 +204,7 @@ namespace OmiLAXR.Endpoints
             try
             {
                 // Read and parse JSON configuration file
-                var content = File.ReadAllText(filePath).Trim();
+                var content = FileSystem.Current.ReadAllText(filePath).Trim();
                 if (string.IsNullOrEmpty(content))
                     return false;
                 

@@ -16,7 +16,7 @@ namespace OmiLAXR.Context
     [AddComponentMenu("OmiLAXR / Scenario Context / FPS Monitor")]
     [DisallowMultipleComponent]
     [Description("Tracks Frames per Seconds.")]
-    public sealed class FpsMonitor : LearningContext
+    public sealed class FpsMonitor : LearningContext, IFpsProvider
     {
         /// <summary>
         /// Static reference to the singleton instance.
@@ -47,6 +47,9 @@ namespace OmiLAXR.Context
         /// Public accessor for the current instantaneous FPS value.
         /// </summary>
         public int CurrentFPS => currentFPS;
+
+        /// <inheritdoc />
+        public int? GetFps() => enabled ? CurrentFPS : (int?)null;
         
         /// <summary>
         /// Public accessor for the current smoothed average FPS value.

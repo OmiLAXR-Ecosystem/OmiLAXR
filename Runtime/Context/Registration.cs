@@ -18,7 +18,7 @@ namespace OmiLAXR.Context
     [DisallowMultipleComponent]
     [AddComponentMenu("OmiLAXR / Scenario Context / Registration")]
     [Description("Component for holding a registration UUID.")]
-    public sealed class Registration : LearningContext
+    public sealed class Registration : LearningContext, IRegistrationProvider
     {
         /// <summary>
         /// Static reference to the singleton instance.
@@ -60,6 +60,9 @@ namespace OmiLAXR.Context
         /// Uses System.Guid.NewGuid() to ensure uniqueness and standards compliance.
         /// </summary>
         /// <returns>A new globally unique identifier</returns>
+        /// <inheritdoc />
+        public Guid? GetRegistration() => enabled && Guid.TryParse(uuid, out var registration) ? registration : (Guid?)null;
+
         public Guid GenerateUuid()
         {
             return System.Guid.NewGuid();

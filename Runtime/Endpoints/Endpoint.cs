@@ -22,7 +22,7 @@ namespace OmiLAXR.Endpoints
     /// Executes early in Unity's execution order to ensure proper initialization.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
-    public abstract class Endpoint : DataProviderPipelineComponent, IEndpoint, IDataMapConsumer, IDataMapProvider
+    public abstract class Endpoint : DataProviderPipelineComponent, IEndpoint, IStatementTransport, IDataMapConsumer, IDataMapProvider
     {
         /// <summary>
         /// Total count of successfully recorded statements.
@@ -66,9 +66,21 @@ namespace OmiLAXR.Endpoints
         public bool IsSending { get; private set; } // True when the endpoint is actively processing statements
         public bool IsTransferring { get; private set; } // True during actual network/file transfer operations
 
-        // Threading and coroutine infrastructure
-        private Thread _sendThread; // Background thread for statement processing
-        private Coroutine _sendCoroutine; // Unity coroutine alternative to threading
+        // Worker running the send loop (thread, coroutine or manual)
+        private ISendWorker _worker;
+
+        /// <summary>
+        /// Creates the worker that runs the send loop. Defaults to a background thread or,
+        /// if <see cref="useThreads"/> is false, a coroutine. Override e.g. with a <see cref="ManualSendWorker"/>.
+        /// </summary>
+        protected virtual ISendWorker CreateSendWorker()
+        {
+#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
+            if (useThreads)
+                return new ThreadSendWorker($"EndpointThread-{GetType().Name}");
+#endif
+            return new CoroutineSendWorker(this);
+        }
 
         // Queue management for statement processing
         protected readonly Queue<IStatement>
@@ -76,13 +88,6 @@ namespace OmiLAXR.Endpoints
 
         private readonly Queue<Action> _executionQueue = new Queue<Action>(); // Actions to execute on main thread
 
-        // Thread synchronization mechanism (only available on thread-supporting platforms)
-#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
-        private readonly AutoResetEvent _signal = new AutoResetEvent(false);
-#endif
-
-        // Shutdown coordination flag
-        private bool _shuttingDown;
         private bool _isFlushing;
 
         /// <summary>
@@ -103,83 +108,21 @@ namespace OmiLAXR.Endpoints
         private bool dropRemainingAfterBudget = false;
 
         /// <summary>
-        /// Main worker loop for threaded statement processing.
-        /// Continuously processes the statement queue until shutdown is requested.
-        /// Handles errors gracefully and implements retry logic with exponential backoff.
+        /// One iteration of the send loop, executed by the <see cref="ISendWorker"/>:
+        /// sends the next batch and logs unsuccessful transfers.
         /// </summary>
-        private void SendWorkerLoop()
+        private TransferCode SendStep()
         {
-            try
+            var result = HandleQueue();
+
+            // Log errors for unsuccessful transfers (except normal "no statements" case)
+            if (result != TransferCode.Success && result != TransferCode.NoStatements &&
+                result != TransferCode.Queued)
             {
-                // Continue processing until shutdown is requested
-                while (!_shuttingDown)
-                {
-                    // Process available statements from the queue
-                    var result = HandleQueue();
-
-                    // Early exit if shutdown was requested during processing
-                    if (_shuttingDown) break;
-
-                    // Log errors for unsuccessful transfers (except normal "no statements" case)
-                    if (result != TransferCode.Success && result != TransferCode.NoStatements &&
-                        result != TransferCode.Queued)
-                    {
-                        DebugLog.OmiLAXR?.Error($"Failed to send statements. Error code: {result}");
-                    }
-
-                    // Stop processing permanently if credentials are invalid
-                    if (result == TransferCode.InvalidCredentials)
-                        break;
-
-                    // Implement adaptive waiting based on transfer results
-                    // Longer waits when no statements are available to reduce CPU usage
-#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
-                    if (useThreads)
-                        _signal.WaitOne(result == TransferCode.NoStatements ? 100 : 10);
-#else
-                    Thread.Sleep(result == TransferCode.NoStatements ? 100 : 10);
-#endif
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log any unexpected exceptions to help with debugging
-                Debug.LogException(ex);
-            }
-        }
-
-        /// <summary>
-        /// Coroutine-based worker for statement processing on platforms without thread support.
-        /// Provides the same functionality as SendWorkerLoop but using Unity's coroutine system.
-        /// </summary>
-        private IEnumerator SendWorkerCoroutine()
-        {
-            while (!_shuttingDown)
-            {
-                // Process available statements from the queue
-                var result = HandleQueue();
-
-                // Early exit if shutdown was requested during processing
-                if (_shuttingDown) break;
-
-                // Log errors for unsuccessful transfers (except normal "no statements" case)
-                if (result != TransferCode.Success && result != TransferCode.NoStatements &&
-                    result != TransferCode.Queued)
-                {
-                    DebugLog.OmiLAXR?.Error($"Failed to send statements. Error code: {result}");
-                }
-
-                // Stop processing permanently if credentials are invalid
-                if (result == TransferCode.InvalidCredentials)
-                    break;
-
-                // Yield control back to Unity with adaptive timing
-                // Longer delays when no statements are available to improve performance
-                yield return new WaitForSeconds(result == TransferCode.NoStatements ? 0.1f : 0.01f);
+                DebugLog.OmiLAXR?.Error($"Failed to send statements. Error code: {result}");
             }
 
-            // Clean up coroutine reference when finished
-            _sendCoroutine = null;
+            return result;
         }
 
         /// <summary>
@@ -190,15 +133,11 @@ namespace OmiLAXR.Endpoints
         public virtual void StartSending(bool resetQueue = false)
         {
             // Prevent starting if component is disabled or already sending.
-            // A previous Pause/Stop leaves _shuttingDown set, which is reset below so sending can resume.
             if (!enabled || IsSending)
                 return;
 
             // Log the start of sending with endpoint type information
             DebugLog.OmiLAXR.Print($"🚀({GetType().Name}) started writing statements.");
-
-            // Reset shutdown flag for new sending session
-            _shuttingDown = false;
 
             // Allow enqueueing again
             _accepting = true;
@@ -212,26 +151,9 @@ namespace OmiLAXR.Endpoints
                 }
             }
 
-            // Initialize appropriate worker based on platform capabilities
-            if (useThreads)
-            {
-                // Create and start background thread for statement processing
-                _sendThread = new Thread(SendWorkerLoop)
-                {
-                    IsBackground = true, // Allow application to exit even if thread is running
-                    Name = $"EndpointThread-{GetType().Name}" // Descriptive name for debugging
-                };
-                _sendThread.Start();
-            }
-            else
-            {
-                // Clean up any existing coroutine before starting new one
-                if (_sendCoroutine != null)
-                    StopCoroutine(_sendCoroutine);
-
-                // Start coroutine-based processing
-                _sendCoroutine = StartCoroutine(SendWorkerCoroutine());
-            }
+            // Initialize the worker (thread or coroutine based on platform capabilities)
+            _worker = CreateSendWorker();
+            _worker.Start(SendStep);
 
             // Notify external listeners that sending has started
             OnStartedSending?.Invoke(this);
@@ -240,10 +162,7 @@ namespace OmiLAXR.Endpoints
             IsSending = true;
 
             // Wake the worker in case there is already work pending
-#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
-            if (useThreads)
-                _signal.Set();
-#endif
+            _worker.Signal();
         }
 
         /// <summary>
@@ -256,26 +175,11 @@ namespace OmiLAXR.Endpoints
             if (!IsSending)
                 return;
 
-            // Initiate shutdown sequence
-            _shuttingDown = true;
             IsSending = false;
 
-            // Clean up worker based on current mode
-            if (useThreads)
-            {
-                // Wait for thread to finish processing current batch
-                _sendThread?.Join();
-                _sendThread = null;
-            }
-            else
-            {
-                // Stop coroutine if running
-                if (_sendCoroutine != null)
-                {
-                    StopCoroutine(_sendCoroutine);
-                    _sendCoroutine = null;
-                }
-            }
+            // Wait for the worker to finish processing the current batch
+            _worker?.Stop(Timeout.Infinite);
+            _worker = null;
 
             // Notify external listeners that sending has been paused
             OnPausedSending?.Invoke(this);
@@ -288,50 +192,15 @@ namespace OmiLAXR.Endpoints
         public virtual void StopSending()
         {
             // Robust guard: only skip if nothing is running anymore
-            if (!IsSending && _sendThread == null && _sendCoroutine == null)
+            if (!IsSending && _worker == null)
                 return;
 
             // Stop accepting new statements immediately to prevent enqueue during shutdown
             _accepting = false;
 
-            // Initiate shutdown sequence
-            _shuttingDown = true;
-
-            // Wake the worker if it's waiting (thread-enabled platforms only)
-#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
-            if (useThreads)
-                _signal.Set();
-#endif
-
             // Stop the worker first (bounded waiting), so the flush below does not transfer concurrently with it
-            if (useThreads)
-            {
-                if (_sendThread != null)
-                {
-                    const int joinMs = 2000;
-                    if (!_sendThread.Join(joinMs))
-                    {
-                        // Thread is background; avoid blocking shutdown forever
-                        try
-                        {
-                            _sendThread.Interrupt();
-                        }
-                        catch
-                        {
-                        }
-                    }
-
-                    _sendThread = null;
-                }
-            }
-            else
-            {
-                if (_sendCoroutine != null)
-                {
-                    StopCoroutine(_sendCoroutine);
-                    _sendCoroutine = null;
-                }
-            }
+            _worker?.Stop(2000);
+            _worker = null;
 
             // Reliability: flush pending statements on stop (thread-safe)
             if (flushOnStop)
@@ -418,7 +287,7 @@ namespace OmiLAXR.Endpoints
         /// <param name="statement">The statement to be queued for sending</param>
         public virtual void SendStatement(IStatement statement)
         {
-            if (!_accepting || _shuttingDown) return;
+            if (!_accepting) return;
 
             // Add statement to the processing queue
             lock (_queuedStatementsLock)
@@ -426,10 +295,8 @@ namespace OmiLAXR.Endpoints
                 QueuedStatements.Enqueue(statement);
             }
 
-            // Signal thread worker that new work is available (thread-enabled platforms only)
-#if !OMILAXR_THREADS_DISABLED && !UNITY_WEBGL
-            if (useThreads) _signal.Set();
-#endif
+            // Signal the worker that new work is available
+            _worker?.Signal();
         }
 
         /// <summary>
@@ -550,6 +417,12 @@ namespace OmiLAXR.Endpoints
         /// </summary>
         /// <param name="batch">List of statements to transfer</param>
         /// <returns>Result code indicating transfer success or failure</returns>
+        /// <summary>
+        /// Sends a batch synchronously, bypassing the queue (fires the same events as queued sending).
+        /// </summary>
+        TransferCode IStatementTransport.Send(IReadOnlyList<IStatement> batch)
+            => batch == null || batch.Count == 0 ? TransferCode.NoStatements : TransferStatements(batch.ToList());
+
         private TransferCode TransferStatements(List<IStatement> batch)
         {
             try

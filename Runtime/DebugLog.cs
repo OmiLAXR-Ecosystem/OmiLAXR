@@ -20,6 +20,35 @@ namespace OmiLAXR
     }
     
     /// <summary>
+    /// Prefixed logger as used by OmiLAXR components (see <see cref="DebugLog"/>).
+    /// </summary>
+    public interface IDebugLog
+    {
+        void Print(string message, params object[] ps);
+        void Warning(string message, params object[] ps);
+        void Error(string message, params object[] ps);
+    }
+
+    /// <summary>
+    /// Output target of <see cref="DebugLog"/>. Replace <see cref="DebugLog.Writer"/> to capture or silence logs, e.g. in tests.
+    /// </summary>
+    public interface ILogWriter
+    {
+        void Write(LogType type, string message, Object context);
+    }
+
+    /// <summary>
+    /// Default <see cref="ILogWriter"/> writing to the Unity console.
+    /// </summary>
+    public sealed class UnityLogWriter : ILogWriter
+    {
+        public static readonly UnityLogWriter Instance = new UnityLogWriter();
+
+        public void Write(LogType type, string message, Object context)
+            => Debug.unityLogger.Log(type, (object)message, context);
+    }
+
+    /// <summary>
     /// Delegate for building custom debug messages with optional prefixes.
     /// Used for advanced message formatting scenarios.
     /// </summary>
@@ -32,8 +61,19 @@ namespace OmiLAXR
     /// Provides categorized logging methods (Print, Error, Warning) with automatic prefix handling.
     /// Ensures consistent log formatting across the entire OmiLAXR system.
     /// </summary>
-    public sealed class DebugLog
+    public sealed class DebugLog : IDebugLog
     {
+        private static ILogWriter _writer = UnityLogWriter.Instance;
+
+        /// <summary>
+        /// Target all DebugLog instances write to. Setting null restores the Unity console writer.
+        /// </summary>
+        public static ILogWriter Writer
+        {
+            get => _writer;
+            set => _writer = value ?? UnityLogWriter.Instance;
+        }
+
         /// <summary>
         /// Prefix string used to identify log messages from this logger instance.
         /// Appears at the beginning of all messages for easy filtering and identification.
@@ -73,7 +113,7 @@ namespace OmiLAXR
         /// <param name="message">Message format string</param>
         /// <param name="ps">Optional parameters for string formatting</param>
         public void Print(string message, params object[] ps)
-            => Debug.Log(BuildMessage(_prefix, message, ps));
+            => Writer.Write(LogType.Log, BuildMessage(_prefix, message, ps), null);
         
         /// <summary>
         /// Logs an error message to the Unity console.
@@ -82,7 +122,7 @@ namespace OmiLAXR
         /// <param name="message">Error message format string</param>
         /// <param name="ps">Optional parameters for string formatting</param>
         public void Error(string message, params object[] ps)
-            => Debug.LogError(BuildMessage(_prefix, message, ps));
+            => Writer.Write(LogType.Error, BuildMessage(_prefix, message, ps), null);
         
         /// <summary>
         /// Logs a warning message to the Unity console.
@@ -91,7 +131,7 @@ namespace OmiLAXR
         /// <param name="message">Warning message format string</param>
         /// <param name="ps">Optional parameters for string formatting</param>
         public void Warning(string message, params object[] ps)
-            => Debug.LogWarning(BuildMessage(_prefix, message, ps));
+            => Writer.Write(LogType.Warning, BuildMessage(_prefix, message, ps), null);
         
         /// <summary>
         /// Logs an informational message with an associated Unity Object context.
@@ -100,7 +140,7 @@ namespace OmiLAXR
         /// <param name="message">Message to log</param>
         /// <param name="context">Unity Object to associate with this log message</param>
         public void Print(string message, Object context)
-            => Debug.Log(BuildMessage(_prefix, message), context);
+            => Writer.Write(LogType.Log, BuildMessage(_prefix, message), context);
         
         /// <summary>
         /// Logs an error message with an associated Unity Object context.
@@ -109,7 +149,7 @@ namespace OmiLAXR
         /// <param name="message">Error message to log</param>
         /// <param name="context">Unity Object to associate with this error message</param>
         public void Error(string message, Object context)
-            => Debug.LogError(BuildMessage(_prefix, message), context);
+            => Writer.Write(LogType.Error, BuildMessage(_prefix, message), context);
         
         /// <summary>
         /// Logs a warning message with an associated Unity Object context.
@@ -118,6 +158,6 @@ namespace OmiLAXR
         /// <param name="message">Warning message to log</param>
         /// <param name="context">Unity Object to associate with this warning message</param>
         public void Warning(string message, Object context)
-            => Debug.LogWarning(BuildMessage(_prefix, message), context);
+            => Writer.Write(LogType.Warning, BuildMessage(_prefix, message), context);
     }
 }

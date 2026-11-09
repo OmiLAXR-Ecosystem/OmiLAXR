@@ -15,7 +15,7 @@ namespace OmiLAXR.Listeners
     /// for analytics tracking. They serve as the entry point for identifying trackable objects
     /// in the scene and making them available for further processing by composers and endpoints.
     /// </summary>
-    public abstract class Listener : ActorPipelineComponent
+    public abstract class Listener : ActorPipelineComponent, IObjectSource
     {
         /// <summary>
         /// Event triggered when objects are discovered and provided to the pipeline.

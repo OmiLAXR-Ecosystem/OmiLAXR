@@ -11,7 +11,7 @@ namespace OmiLAXR.TrackingBehaviours
     /// Core interface for tracking behavior components that monitor user interactions and system events.
     /// Provides methods for accessing event fields and associated actors/instructors in the tracking pipeline.
     /// </summary>
-    public interface ITrackingBehaviour
+    public interface ITrackingBehaviour : IActorProvider
     {
         /// <summary>
         /// Retrieves all tracking behavior event fields through reflection.
@@ -19,19 +19,5 @@ namespace OmiLAXR.TrackingBehaviours
         /// </summary>
         /// <returns>Array of FieldInfo objects representing all TrackingBehaviourEvent fields</returns>
         FieldInfo[] GetTrackingBehaviourEvents();
-        
-        /// <summary>
-        /// Gets the Actor component associated with this tracking behavior.
-        /// The Actor represents the entity being tracked (e.g., user, NPC, system).
-        /// </summary>
-        /// <returns>The Actor component in the tracking pipeline</returns>
-        Actor GetActor();
-        
-        /// <summary>
-        /// Gets the Instructor component that manages this tracking behavior.
-        /// The Instructor coordinates tracking behaviors and handles their lifecycle.
-        /// </summary>
-        /// <returns>The Instructor component managing this tracking behavior</returns>
-        Instructor GetInstructor();
     }
 }

@@ -27,7 +27,7 @@ namespace OmiLAXR.Utils
         /// Underlying file stream for direct file system access.
         /// Managed by the BufferedStream for actual I/O operations.
         /// </summary>
-        private readonly FileStream _fileStream;
+        private readonly Stream _fileStream;
         
         /// <summary>
         /// Reusable byte buffer for UTF-8 encoding operations.
@@ -56,10 +56,17 @@ namespace OmiLAXR.Utils
         /// <param name="path">File path to write to</param>
         /// <param name="bufferSize">Size of the internal buffer in bytes (default: 8192)</param>
         public BufferedUtf8Writer(string path, int bufferSize = 8192)
+            : this(OpenWithRetry(path), path, bufferSize)
         {
-            _fileStream = OpenWithRetry(path, bufferSize);
-            // Append to existing content; OpenOrCreate alone would overwrite the beginning of the file
-            _fileStream.Seek(0, SeekOrigin.End);
+        }
+
+        /// <summary>
+        /// Writes to an already opened stream, e.g. one provided by an <see cref="IFileSystem"/> or a test.
+        /// The writer takes ownership and disposes the stream.
+        /// </summary>
+        public BufferedUtf8Writer(Stream stream, string path, int bufferSize = 8192)
+        {
+            _fileStream = stream ?? throw new ArgumentNullException(nameof(stream));
             _bufferedStream = new BufferedStream(_fileStream, bufferSize);
             _writeBuffer = new byte[bufferSize];
             FilePath = path;
@@ -69,14 +76,15 @@ namespace OmiLAXR.Utils
         /// <summary>
         /// Opens a FileStream with retry handling for sharing violations.
         /// </summary>
-        private static FileStream OpenWithRetry(string path, int bufferSize)
+        private static Stream OpenWithRetry(string path)
         {
             const int maxAttempts = 5;
             for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 try
                 {
-                    return new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite, 8192);
+                    // Append to existing content instead of overwriting the beginning of the file
+                    return FileSystem.Current.OpenWrite(path, append: true);
                 }
                 catch (IOException ex) when (IsSharingViolation(ex) && attempt < maxAttempts)
                 {
@@ -85,7 +93,7 @@ namespace OmiLAXR.Utils
             }
 
             // Let the final attempt throw if still failing
-            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite, 8192);
+            return FileSystem.Current.OpenWrite(path, append: true);
         }
 
         private static bool IsSharingViolation(IOException ex)

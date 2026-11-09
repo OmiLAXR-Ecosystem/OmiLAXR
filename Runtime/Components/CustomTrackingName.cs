@@ -60,10 +60,8 @@ namespace OmiLAXR.Components
                 return customTrackingNameComp.customTrackingName;
             
             // Without <GlobalSettings> in the scene the object name is used
-            var settings = GlobalSettings.Instance;
-            var trackingNameBehaviour = settings
-                ? settings.trackingNameBehaviour
-                : GlobalSettings.TrackingNameBehaviour.ObjectName;
+            var settings = Context.ScenarioContext.TrackingNames;
+            var trackingNameBehaviour = settings?.TrackingNameBehaviour ?? GlobalSettings.TrackingNameBehaviour.ObjectName;
             return trackingNameBehaviour == GlobalSettings.TrackingNameBehaviour.HierarchyTreePath 
                 ? obj.GetFullHierarchyPath() 
                 : obj.name;
