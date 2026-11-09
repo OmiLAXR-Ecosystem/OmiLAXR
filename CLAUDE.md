@@ -13,7 +13,7 @@ Working rules (versioning, CHANGELOG, `.meta` files, licenses, compatibility) ar
 There is no command-line build or linter: the package compiles inside a Unity project. Paths below are relative to the workspace root (`..`).
 
 - **Develop:** open `OmiLAXR_Dev/` in Unity 6000.3.13f1. Its `Packages/manifest.json` links `com.rwth.unity.omilaxr` from disk (`file:`), so edits recompile live.
-- **Tests** (`Tests/`, assembly `OmiLAXR.Tests.Runtime`): the test asmdef is a runtime assembly, so the tests are PlayMode-only. Run them in the Unity Test Runner (PlayMode tab).
+- **Tests:** `Tests/Runtime` (assembly `OmiLAXR.Tests.Runtime`) is a runtime assembly, so those tests are PlayMode-only. `Tests/Editor` (assembly `OmiLAXR.Tests.Editor`) holds EditMode tests for editor code. Run them in the Unity Test Runner (PlayMode or EditMode tab).
 - **CLI test run.** Batch mode fails while the editor has the project open. In that case, run against an APFS copy (`cp -c -R OmiLAXR_Dev <scratch>/Dev`).
 
   ```bash
@@ -59,7 +59,7 @@ Everything is a `MonoBehaviour` that finds its collaborators in the scene hierar
 - `Runtime/Utils`: `BufferedUtf8Writer`, CSV helpers, `Clock`, `FileSystem`, `KeyValueStore`.
 - `PipelineComponent.FindObject`/`FindObjects` wrap the Unity-version-specific find APIs. Use them instead of `FindObjectsByType`/`FindObjectOfType`.
 
-**Editor** (`Editor/`): inspectors for `Pipeline`, `DataProvider` and `LocalFileEndpoint`, property drawers, menu items that add the prefabs to a scene, and `DefineUtility` for scripting defines.
+**Editor** (`Editor/`): inspectors for `Pipeline`, `DataProvider` and `LocalFileEndpoint`, property drawers, menu items that add the prefabs to a scene, and `DefineUtility` for scripting defines. `Editor/Wizard` holds the OmiLAXR Wizard (`WizardWindow`). Modules add sections to it by implementing `IWizardSection` in their editor assembly. `ScopedRegistry` edits `Packages/manifest.json`.
 
 **Tests** (`Tests/Runtime`)
 - Fakes live in `Tests/Runtime/Mocks`: `MockStatement`, `FixedClock`, `CapturingLogWriter` and `InMemoryFileSystem`.
