@@ -9,7 +9,7 @@ using UnityEngine;
 namespace OmiLAXR.Listeners
 {
     /// <summary>
-    /// Base class for listeners that turn gaze sources (a camera, an eye, an XR gaze interactor) into trackable objects.
+    /// Base class for listeners that turn gaze sources (the main camera, the eyes of a headset) into trackable objects.
     /// For every component of type <typeparamref name="T"/> that passes <c>IsCorrectComponent</c>, it adds a
     /// <see cref="GazeDetector"/>, and optionally a <see cref="FixationDetector"/>, a <see cref="TransformWatcher"/> and a debug ray.
     /// </summary>
