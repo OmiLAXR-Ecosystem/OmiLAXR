@@ -111,7 +111,7 @@ namespace OmiLAXR.Endpoints
                     identifier = "{yyyyMMddHHmmss}";
 
                 // Process timestamp formatting and cache result
-                return _resolvedIdentifier = IsInTimeFormat(identifier) ? GenerateIdentifier(DateTime.Now) : _resolvedIdentifier;
+                return _resolvedIdentifier = IsInTimeFormat(identifier) ? GenerateIdentifier(DateTime.Now) : identifier;
             }
         }
         
@@ -289,8 +289,9 @@ namespace OmiLAXR.Endpoints
         /// Unity lifecycle method called when the component is destroyed.
         /// Ensures proper cleanup of all file buffers and streams.
         /// </summary>
-        protected virtual void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy(); // stop sending and flush queued statements before closing the files
             FileBufferManager.Dispose();
         }
 
@@ -300,6 +301,7 @@ namespace OmiLAXR.Endpoints
         /// </summary>
         protected override void OnDisable()
         {
+            base.OnDisable(); // stop sending and flush queued statements before closing the files
             FileBufferManager.Dispose();
         }
 
@@ -327,7 +329,8 @@ namespace OmiLAXR.Endpoints
 #endif
 
             // Initialize system for normal platforms
-            var composers = GetDataProvider<DataProvider>().GetComponentsInChildren<IComposer>();
+            var dataProvider = GetDataProvider<DataProvider>();
+            var composers = dataProvider ? dataProvider.GetComponentsInChildren<IComposer>() : Array.Empty<IComposer>();
 
             // Pre-allocate buffer capacity for better performance (Unity 2021.1+)
 #if UNITY_2021_1_OR_NEWER
@@ -343,13 +346,20 @@ namespace OmiLAXR.Endpoints
 
         public override void ConsumeDataMap(DataMap map)
         {
-            statementsFolder = (string)map["statementsFolder"] ?? statementsFolder;
-            identifier = (string)map["identifier"] ?? identifier;
-            customLocation = (string)map["customLocation"] ?? customLocation;
-            if (Enum.TryParse(map["defaultFolder"] as string, out DefaultFolderPaths result))
+            statementsFolder = GetMapValue(map, "statementsFolder", statementsFolder);
+            identifier = GetMapValue(map, "identifier", identifier);
+            customLocation = GetMapValue(map, "customLocation", customLocation);
+            if (Enum.TryParse(GetMapValue<string>(map, "defaultFolder", null), out DefaultFolderPaths result))
                 defaultFolder =  result;
-            oneFilePerComposer = (bool)map["oneFilePerComposer"];
+            oneFilePerComposer = GetMapValue(map, "oneFilePerComposer", oneFilePerComposer);
+            _resolvedIdentifier = null; // identifier may have changed
         }
+
+        /// <summary>
+        /// Reads a value from a data map, keeping the fallback if the key is missing or has another type.
+        /// </summary>
+        protected static T GetMapValue<T>(DataMap map, string key, T fallback)
+            => map != null && map.TryGetValue(key, out var value) && value is T typed ? typed : fallback;
 
         public override DataMap ProvideDataMap()
         {

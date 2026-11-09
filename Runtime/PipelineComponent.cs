@@ -79,13 +79,14 @@ namespace OmiLAXR
         /// <returns>The singleton instance</returns>
         protected static T GetInstance<T>(ref T instance) where T : Object
         {
+            // Unity's null check (not ??=) so that destroyed instances, e.g. after a scene change, are looked up again
+            if (!instance)
 #if UNITY_2023_1_OR_NEWER
-            return instance ??= FindFirstObjectByType<T>();
-#else 
-            if (instance == null)
+                instance = FindFirstObjectByType<T>();
+#else
                 instance = FindObjectOfType<T>();
-            return instance;
 #endif
+            return instance;
         }
 
         protected virtual void OnAppQuit()

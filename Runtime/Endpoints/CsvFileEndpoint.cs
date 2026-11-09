@@ -183,6 +183,7 @@ namespace OmiLAXR.Endpoints
         /// </summary>
         protected override void OnDestroy()
         {
+            StopSending();              // Flush queued statements into the data file first
             MergeCsvHeaderAndData();    // Complete final file assembly
             base.OnDestroy();           // Call base cleanup
         }
@@ -193,6 +194,7 @@ namespace OmiLAXR.Endpoints
         /// </summary>
         protected override void OnDisable()
         {
+            StopSending();              // Flush queued statements into the data file first
             MergeCsvHeaderAndData();    // Complete final file assembly
             base.OnDisable();           // Call base cleanup
         }
@@ -303,10 +305,7 @@ namespace OmiLAXR.Endpoints
                 // Handle file I/O errors gracefully
                 Debug.LogException(ex);
 
-                // Trigger failure events and re-queue statement for retry
-                TriggerFailedStatement(statement);
-                QueuedStatements.Enqueue(statement);
-                
+                // The base endpoint reports the failure (OnFailedSendingStatement)
                 return TransferCode.Error;
             }
         }
@@ -314,9 +313,9 @@ namespace OmiLAXR.Endpoints
         public override void ConsumeDataMap(DataMap map)
         {
             base.ConsumeDataMap(map);
-            flatten = (bool)map["flatten"];
-            filterOptions.includePattern = (string)map["includePattern"];
-            filterOptions.excludePattern = (string)map["excludePattern"];
+            flatten = GetMapValue(map, "flatten", flatten);
+            filterOptions.includePattern = GetMapValue(map, "includePattern", filterOptions.includePattern);
+            filterOptions.excludePattern = GetMapValue(map, "excludePattern", filterOptions.excludePattern);
         }
 
         public override DataMap ProvideDataMap()

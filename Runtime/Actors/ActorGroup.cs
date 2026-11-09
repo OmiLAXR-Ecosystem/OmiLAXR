@@ -25,7 +25,13 @@ namespace OmiLAXR
         /// Returns the current array of actors that belong to this group.
         /// </summary>
         /// <returns>An array of Actor components that are members of this group.</returns>
-        public Actor[] GetMembers() => _members;
+        public Actor[] GetMembers()
+        {
+            // Members are collected in Start(); statements composed before that would otherwise get null
+            if (_members == null)
+                UpdateMemberList();
+            return _members;
+        }
 
         /// <summary>
         /// Initializes the group by collecting all member actors.

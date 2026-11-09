@@ -110,85 +110,117 @@ namespace OmiLAXR.TrackingBehaviours
         {
             try
             {
-                // Set up pipeline lifecycle event handlers
-                Pipeline.BeforeStartedPipeline += _ =>
-                {
-                    if (!enabled)
-                        return;
-                    BeforeStartedPipeline(Pipeline);
-                };
-                
-                // Handle pipeline start - this is where tracking begins
-                Pipeline.AfterStartedPipeline += _ =>
-                {
-                    if (!enabled)
-                        return;
-                    OnStartedPipeline(Pipeline);
-                };
-                
-                // Handle pipeline preparation for stop
-                Pipeline.BeforeStoppedPipeline += _ =>
-                {
-                    if (!enabled)
-                        return;
-                    BeforeStoppedPipeline(Pipeline);
-                };
-                
-                // Handle pipeline stop - cleanup and resource disposal
-                Pipeline.AfterStoppedPipeline += _ =>
-                {
-                    if (!enabled)
-                        return;
-                    OnStoppedPipeline(Pipeline);
-                    ClearSchedules(); // Stop and clean up all schedulers
-                    Dispose(AllFilteredObjects.Select(o => o as Object).ToArray()); // Clean up tracked objects
-                };
+                // Pipelines toggle their GameObject on start/stop, so OnEnable runs on every restart.
+                // Subscribe only once per pipeline, otherwise every restart duplicates all callbacks.
+                var pipeline = Pipeline;
+                if (_subscribedPipeline == pipeline)
+                    return;
+                UnsubscribePipeline();
 
-                // Handle objects discovered by the pipeline (before filtering)
-                Pipeline.AfterFoundObjects += (objects) =>
-                {
-                    if (!enabled)
-                        return;
-                    // Type optimization: skip selection if T is already Object type
-                    AfterFoundObjects(typeof(T) == typeof(Object) ? objects as T[] : Select<T>(objects));
-                };
-
-                // Handle objects after they've been filtered by the pipeline (main tracking target)
-                Pipeline.AfterFilteredObjects += (objects) =>
-                {
-                    if (!enabled)
-                        return;
-                    var selectedObjects = ExtractOrSelect<T>(objects);
-                    var newSelectedObjects = new List<T>();
-                    // Filter objects to match our tracking type and store them
-                    foreach (var o in objects)
-                    {
-                        if (AllFilteredObjects.Contains(o))
-                            continue;
-                        AllFilteredObjects.Add(o);
-                    }
-                    foreach (var s in selectedObjects)
-                    {
-                        if (SelectedObjects.Contains(s))
-                            continue;
-                        SelectedObjects.Add(s);
-                        newSelectedObjects.Add(s);
-                    }
-                    AfterFilteredObjects(newSelectedObjects.ToArray());
-                };
-
-                Pipeline.OnQuit += (_) =>
-                {
-                    if (!enabled)
-                        return;
-                    OnQuitPipeline(Pipeline);
-                };
+                pipeline.BeforeStartedPipeline += HandleBeforeStartedPipeline;
+                pipeline.AfterStartedPipeline += HandleAfterStartedPipeline;
+                pipeline.BeforeStoppedPipeline += HandleBeforeStoppedPipeline;
+                pipeline.AfterStoppedPipeline += HandleAfterStoppedPipeline;
+                pipeline.AfterFoundObjects += HandleAfterFoundObjects;
+                pipeline.AfterFilteredObjects += HandleAfterFilteredObjects;
+                pipeline.OnQuit += HandleQuit;
+                _subscribedPipeline = pipeline;
             }
             catch (Exception ex)
             {
                 // Log initialization errors but don't crash the application
                 DebugLog.OmiLAXR.Error($"Error initializing {GetType().Name}: {ex.Message}");
             }
+        }
+
+        private Pipeline _subscribedPipeline;
+
+        private void UnsubscribePipeline()
+        {
+            if (!_subscribedPipeline)
+                return;
+            _subscribedPipeline.BeforeStartedPipeline -= HandleBeforeStartedPipeline;
+            _subscribedPipeline.AfterStartedPipeline -= HandleAfterStartedPipeline;
+            _subscribedPipeline.BeforeStoppedPipeline -= HandleBeforeStoppedPipeline;
+            _subscribedPipeline.AfterStoppedPipeline -= HandleAfterStoppedPipeline;
+            _subscribedPipeline.AfterFoundObjects -= HandleAfterFoundObjects;
+            _subscribedPipeline.AfterFilteredObjects -= HandleAfterFilteredObjects;
+            _subscribedPipeline.OnQuit -= HandleQuit;
+            _subscribedPipeline = null;
+        }
+
+        protected virtual void OnDestroy() => UnsubscribePipeline();
+
+        private void HandleBeforeStartedPipeline(Pipeline _)
+        {
+            if (!enabled)
+                return;
+            BeforeStartedPipeline(Pipeline);
+        }
+
+        // Handle pipeline start - this is where tracking begins
+        private void HandleAfterStartedPipeline(Pipeline _)
+        {
+            if (!enabled)
+                return;
+            OnStartedPipeline(Pipeline);
+        }
+
+        private void HandleBeforeStoppedPipeline(Pipeline _)
+        {
+            if (!enabled)
+                return;
+            BeforeStoppedPipeline(Pipeline);
+        }
+
+        // Handle pipeline stop - cleanup and resource disposal
+        private void HandleAfterStoppedPipeline(Pipeline _)
+        {
+            if (!enabled)
+                return;
+            OnStoppedPipeline(Pipeline);
+            ClearSchedules(); // Stop and clean up all schedulers
+            Dispose(AllFilteredObjects.Select(o => o as Object).ToArray()); // Clean up tracked objects
+        }
+
+        // Handle objects discovered by the pipeline (before filtering)
+        private void HandleAfterFoundObjects(Object[] objects)
+        {
+            if (!enabled)
+                return;
+            // Type optimization: skip selection if T is already Object type
+            AfterFoundObjects(typeof(T) == typeof(Object) ? objects as T[] : Select<T>(objects));
+        }
+
+        // Handle objects after they've been filtered by the pipeline (main tracking target)
+        private void HandleAfterFilteredObjects(Object[] objects)
+        {
+            if (!enabled)
+                return;
+            var selectedObjects = ExtractOrSelect<T>(objects);
+            var newSelectedObjects = new List<T>();
+            // Filter objects to match our tracking type and store them
+            foreach (var o in objects)
+            {
+                if (AllFilteredObjects.Contains(o))
+                    continue;
+                AllFilteredObjects.Add(o);
+            }
+            foreach (var s in selectedObjects)
+            {
+                if (SelectedObjects.Contains(s))
+                    continue;
+                SelectedObjects.Add(s);
+                newSelectedObjects.Add(s);
+            }
+            AfterFilteredObjects(newSelectedObjects.ToArray());
+        }
+
+        private void HandleQuit(Pipeline _)
+        {
+            if (!enabled)
+                return;
+            OnQuitPipeline(Pipeline);
         }
         
         /// <summary>

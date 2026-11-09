@@ -214,9 +214,8 @@ namespace OmiLAXR.TrackingBehaviours.Learner.HeadTracking
         public static bool NormalHeadMovement(string axis, List<HmdTimedPosition> hmdPositions, double minNormalHeadMovements)
         {
             // calculate if the difference between the maximum and minimum value of a list of hmdPositions is greater than a specific threshold (minNormalHeadMovements)
-            return
-                (HmdPosition.Instance.GetMaxMinPosition("max", axis, hmdPositions).hmdPosition.Position.x
-                - HmdPosition.Instance.GetMaxMinPosition("min", axis, hmdPositions).hmdPosition.Position.x) > minNormalHeadMovements;
+            var values = ConvertHmdPositionListIntoFloatList(hmdPositions, axis);
+            return values.Count > 0 && (values.Max() - values.Min()) > minNormalHeadMovements;
         }
 
         /// <summary>

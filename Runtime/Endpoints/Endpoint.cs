@@ -189,8 +189,9 @@ namespace OmiLAXR.Endpoints
         /// <param name="resetQueue">If true, clears existing queued statements before starting</param>
         public virtual void StartSending(bool resetQueue = false)
         {
-            // Prevent starting if component is disabled, already sending, or shutting down
-            if (!enabled || IsSending || _shuttingDown)
+            // Prevent starting if component is disabled or already sending.
+            // A previous Pause/Stop leaves _shuttingDown set, which is reset below so sending can resume.
+            if (!enabled || IsSending)
                 return;
 
             // Log the start of sending with endpoint type information
@@ -302,33 +303,7 @@ namespace OmiLAXR.Endpoints
                 _signal.Set();
 #endif
 
-            // Reliability: flush pending statements on stop (thread-safe)
-            if (flushOnStop)
-            {
-                if (flushOnStopSecondsBudget > 0f)
-                {
-                    FlushQueueBudget(flushOnStopSecondsBudget);
-
-                    if (dropRemainingAfterBudget)
-                    {
-                        lock (_queuedStatementsLock)
-                            QueuedStatements.Clear();
-                    }
-                }
-                else
-                {
-                    // "Flush all" (can take long, but no intentional loss)
-                    FlushQueue();
-                }
-            }
-            else
-            {
-                // No flush requested: drop remaining to guarantee fast shutdown
-                lock (_queuedStatementsLock)
-                    QueuedStatements.Clear();
-            }
-
-            // Clean up worker based on current mode (bounded waiting)
+            // Stop the worker first (bounded waiting), so the flush below does not transfer concurrently with it
             if (useThreads)
             {
                 if (_sendThread != null)
@@ -358,6 +333,32 @@ namespace OmiLAXR.Endpoints
                 }
             }
 
+            // Reliability: flush pending statements on stop (thread-safe)
+            if (flushOnStop)
+            {
+                if (flushOnStopSecondsBudget > 0f)
+                {
+                    FlushQueueBudget(flushOnStopSecondsBudget);
+
+                    if (dropRemainingAfterBudget)
+                    {
+                        lock (_queuedStatementsLock)
+                            QueuedStatements.Clear();
+                    }
+                }
+                else
+                {
+                    // "Flush all" (can take long, but no intentional loss)
+                    FlushQueue();
+                }
+            }
+            else
+            {
+                // No flush requested: drop remaining to guarantee fast shutdown
+                lock (_queuedStatementsLock)
+                    QueuedStatements.Clear();
+            }
+
             // Update state to reflect stopped sending
             IsSending = false;
 
@@ -370,9 +371,13 @@ namespace OmiLAXR.Endpoints
         }
 
         // Unity lifecycle event handlers
-        protected override void OnEnable() => StartSending(); // Auto-start when component becomes active
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            StartSending(); // Auto-start when component becomes active
+        }
         protected virtual void OnDisable() => StopSending(); // Clean stop when component is deactivated
-        private void OnDestroy() => StopSending(); // Ensure cleanup when component is destroyed
+        protected virtual void OnDestroy() => StopSending(); // Ensure cleanup when component is destroyed
 
         /// <summary>
         /// Processes queued statements for a bounded time budget.
@@ -488,6 +493,8 @@ namespace OmiLAXR.Endpoints
                     var result = HandleSending(statement);
                     if (result == TransferCode.Success)
                         TriggerSentStatement(statement);
+                    else if (result != TransferCode.NoStatements)
+                        TriggerFailedStatement(statement);
                 }
 
                 // Allow derived classes to perform post-batch operations

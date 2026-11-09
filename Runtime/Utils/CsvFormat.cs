@@ -134,6 +134,7 @@ namespace OmiLAXR.Utils
         public void FormatHeaders(HeaderFormatter formatter)
         {
             Headers = Headers.Select(h => formatter(h)).ToList();
+            RebuildHeaderIndexCache(); // header names changed, so the cache keys are stale
         }
 
         /// <summary>
@@ -306,7 +307,7 @@ namespace OmiLAXR.Utils
             var sb = new StringBuilder();
 
             foreach (var row in Rows)
-                sb.AppendLine(string.Join(Separator, GetFilteredStringValues(row).Select(FormatCsvValue)));
+                sb.AppendLine(string.Join(Separator, GetFilteredStringValues(row))); // values are already escaped
 
             return sb.ToString();
         }

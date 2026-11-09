@@ -88,7 +88,8 @@ namespace OmiLAXR
             Pipeline.Listeners.AddRange(listeners);
             Pipeline.TrackingBehaviours.AddRange(tbs);
             Pipeline.Filters.AddRange(filters);
-            Pipeline.Extensions.Add(this);
+            if (!Pipeline.Extensions.Contains(this))
+                Pipeline.Extensions.Add(this);
 
             // Log successful extension for debugging
             DebugLog.OmiLAXR.Print("Extended pipeline " + pipeline);

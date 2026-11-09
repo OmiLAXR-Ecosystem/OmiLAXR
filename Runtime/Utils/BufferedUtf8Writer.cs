@@ -58,6 +58,8 @@ namespace OmiLAXR.Utils
         public BufferedUtf8Writer(string path, int bufferSize = 8192)
         {
             _fileStream = OpenWithRetry(path, bufferSize);
+            // Append to existing content; OpenOrCreate alone would overwrite the beginning of the file
+            _fileStream.Seek(0, SeekOrigin.End);
             _bufferedStream = new BufferedStream(_fileStream, bufferSize);
             _writeBuffer = new byte[bufferSize];
             FilePath = path;
@@ -100,10 +102,18 @@ namespace OmiLAXR.Utils
                 var full = line + Environment.NewLine;
                 
                 // Encode to UTF-8 using reusable buffer to avoid allocations
-                var byteCount = Encoding.UTF8.GetBytes(full, 0, full.Length, _writeBuffer, 0);
-                
+                // Lines that don't fit into the reusable buffer get a temporary one
+                var buffer = _writeBuffer;
+                if (Encoding.UTF8.GetMaxByteCount(full.Length) > buffer.Length)
+                {
+                    var requiredBytes = Encoding.UTF8.GetByteCount(full);
+                    if (requiredBytes > buffer.Length)
+                        buffer = new byte[requiredBytes];
+                }
+                var byteCount = Encoding.UTF8.GetBytes(full, 0, full.Length, buffer, 0);
+
                 // Write encoded bytes to buffered stream
-                _bufferedStream.Write(_writeBuffer, 0, byteCount);
+                _bufferedStream.Write(buffer, 0, byteCount);
             }
         }
 

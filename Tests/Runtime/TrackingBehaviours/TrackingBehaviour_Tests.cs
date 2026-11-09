@@ -234,19 +234,23 @@ namespace OmiLAXR.Tests.TrackingBehaviours
         }
 
         [Test]
-        public void TwoArg_Event_Bind_Action_Forwards_Calls()
+        public void ThreeArg_Event_Binds_UnityEvent_Once_And_Unbinds()
         {
             // Arrange
-            var ev = new TrackingBehaviourEvent<string, int>();
+            var ev = new TrackingBehaviourEvent<string, int, bool>();
+            var unityEvent = new UnityEvent<int>();
             var received = 0;
-            Action<int> source = _ => { };
+            UnityAction<int> invoker = v => received += v;
 
             // Act
-            ev.Bind(source, v => received += v);
-            source(7);
+            ev.Bind(unityEvent, invoker);
+            ev.Bind(unityEvent, invoker);
+            unityEvent.Invoke(1);
+            ev.Unbind(unityEvent);
+            unityEvent.Invoke(10);
 
             // Assert
-            Assert.AreEqual(7, received);
+            Assert.AreEqual(1, received);
         }
 
         [Test]

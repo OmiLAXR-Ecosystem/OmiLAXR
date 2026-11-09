@@ -255,24 +255,21 @@ namespace OmiLAXR
                 if (!Filters.Contains(comp))
                     Filters.Add(comp as Filter);
             }
-            else if (type.IsSubclassOf(typeof(ITrackingBehaviour)))
+            else if (typeof(ITrackingBehaviour).IsAssignableFrom(type))
             {
                 var tb = comp as ITrackingBehaviour;
                 if (!TrackingBehaviours.Contains(tb))
                     TrackingBehaviours.Add(tb);
             }
-            else if (type.IsSubclassOf(typeof(IPipelineExtension)))
+            else if (typeof(IPipelineExtension).IsAssignableFrom(type))
             {
                 // Handle pipeline extensions with special registration logic
-                var pc = comp as IPipelineComponent;
-                if (pc != null)
+                var ext = comp as IPipelineExtension;
+                if (ext != null && !Extensions.Contains(ext))
                 {
-                    if (!Extensions.Contains(pc))
-                    {
-                        var ext = pc as IPipelineExtension;
-                        ext?.Extend(this); // Apply extension to this pipeline
+                    ext.Extend(this); // Apply extension to this pipeline (registers itself in Extensions)
+                    if (!Extensions.Contains(ext))
                         Extensions.Add(ext);
-                    }
                 }
             }
         }
@@ -282,6 +279,15 @@ namespace OmiLAXR
         /// Checks for ActorGroup first, then falls back to individual Actor.
         /// </summary>
         /// <returns>Actor or ActorGroup component, or null if none found</returns>
+        private static void AddMissing<TItem>(List<TItem> target, IEnumerable<TItem> items)
+        {
+            foreach (var item in items)
+            {
+                if (!target.Contains(item))
+                    target.Add(item);
+            }
+        }
+
         private Actor FindActor()
         {
             var actorGroup = GetComponent<ActorGroup>();
@@ -303,15 +309,16 @@ namespace OmiLAXR
             ActorDataProviders = GetComponentsInChildren<ActorDataProvider>(false);
             
             // Discover and collect all pipeline components from hierarchy
-            TrackingBehaviours.AddRange(GetComponentsInChildren<ITrackingBehaviour>(false));
-            Listeners.AddRange(GetComponentsInChildren<Listener>(false));
-            Filters.AddRange(GetComponentsInChildren<Filter>(false));
+            // Init runs on every (re)start, so only add components that are not registered yet
+            AddMissing(TrackingBehaviours, GetComponentsInChildren<ITrackingBehaviour>(false));
+            AddMissing(Listeners, GetComponentsInChildren<Listener>(false));
+            AddMissing(Filters, GetComponentsInChildren<Filter>(false));
             
             // Find all available data providers in the scene (not just children)
 #if UNITY_2023_1_OR_NEWER
-            DataProviders.AddRange(FindObjectsByType<DataProvider>(FindObjectsInactive.Exclude, FindObjectsSortMode.None));
+            AddMissing(DataProviders, FindObjectsByType<DataProvider>(FindObjectsInactive.Exclude, FindObjectsSortMode.None));
 #else
-            DataProviders.AddRange(FindObjectsOfType<DataProvider>(false));
+            AddMissing(DataProviders, FindObjectsOfType<DataProvider>(false));
 #endif
             
             // Bind pipeline events to data provider events for analytics processing
@@ -320,12 +327,15 @@ namespace OmiLAXR
                 // Connect composer events for statement creation
                 foreach (var c in dp.Composers)
                 {
+                    c.AfterComposed -= AfterComposed; // avoid duplicate subscriptions on restart
                     c.AfterComposed += AfterComposed;
                 }
                 
                 // Connect endpoint events for statement delivery
                 foreach (var ep in dp.Endpoints)
                 {
+                    ep.OnSendingStatement -= OnSendingStatement;
+                    ep.OnSentStatement -= OnSentStatement;
                     ep.OnSendingStatement += OnSendingStatement;
                     ep.OnSentStatement += OnSentStatement;
                 }

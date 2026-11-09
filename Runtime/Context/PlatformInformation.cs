@@ -100,13 +100,13 @@ namespace OmiLAXR.Context
             var platformStr = $"Unity{Application.platform}v{Application.unityVersion}::OmiLAXR.{module}v{version}::{composerGroup}.{composerName}{sdkStr}";
 
             // Prepend custom prefixes if any are configured
-            if (appendix.prefixes.Length > 0)
+            if (appendix.prefixes != null && appendix.prefixes.Length > 0)
             {
                 platformStr = $"{string.Join(":", appendix.prefixes)}:{platformStr}";
             }
             
             // Append custom suffixes if any are configured
-            if (appendix.suffixes.Length > 0)
+            if (appendix.suffixes != null && appendix.suffixes.Length > 0)
             {
                 platformStr = $"{platformStr}:{string.Join(":", appendix.suffixes)}";
             }

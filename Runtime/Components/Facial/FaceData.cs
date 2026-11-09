@@ -41,10 +41,10 @@ namespace OmiLAXR.Components
 
         public override bool Equals(object obj)
         {
-            if (typeof(object) != typeof(FaceData))
+            if (!(obj is FaceData fd))
                 return false;
-            var fd = (FaceData)obj;
-            return fd.Weights.AreValuesEqual(Weights) && fd.Confidences.AreValuesEqual(Confidences);
+            return ReferenceEquals(this, fd) ||
+                   (fd.Weights.AreValuesEqual(Weights) && fd.Confidences.AreValuesEqual(Confidences));
         }
         
         public override int GetHashCode()

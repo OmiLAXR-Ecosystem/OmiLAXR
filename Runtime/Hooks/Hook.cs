@@ -36,6 +36,6 @@ namespace OmiLAXR.Hooks
         /// <returns>The first matching provider of the specified type, or null if not found</returns>
         protected TS GetProvider<TS>(IStatement statement, bool includeInactive = false) where TS : ActorDataProvider
             => statement.GetSenderPipelineInfo().ActorDataProviders?
-                .FirstOrDefault(o => (includeInactive && !o.enabled) && (o.GetType() == typeof(TS) || o.GetType().IsSubclassOf(typeof(TS)))) as TS;
+                .FirstOrDefault(o => (includeInactive || o.enabled) && o is TS) as TS;
     }
 }

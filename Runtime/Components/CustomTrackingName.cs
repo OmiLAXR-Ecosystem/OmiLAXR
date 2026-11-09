@@ -40,7 +40,8 @@ namespace OmiLAXR.Components
             {
                 return comp.GetComponent<CustomTrackingName>();
             }
-            return ((GameObject)obj).GetComponent<CustomTrackingName>();
+            // Assets like materials cannot carry a CustomTrackingName
+            return obj is GameObject go ? go.GetComponent<CustomTrackingName>() : null;
         }
         
         /// <summary>
@@ -58,7 +59,11 @@ namespace OmiLAXR.Components
             if (customTrackingNameComp)
                 return customTrackingNameComp.customTrackingName;
             
-            var trackingNameBehaviour = GlobalSettings.Instance.trackingNameBehaviour;
+            // Without <GlobalSettings> in the scene the object name is used
+            var settings = GlobalSettings.Instance;
+            var trackingNameBehaviour = settings
+                ? settings.trackingNameBehaviour
+                : GlobalSettings.TrackingNameBehaviour.ObjectName;
             return trackingNameBehaviour == GlobalSettings.TrackingNameBehaviour.HierarchyTreePath 
                 ? obj.GetFullHierarchyPath() 
                 : obj.name;

@@ -437,6 +437,7 @@ namespace OmiLAXR.TrackingBehaviours
         /// </summary>
         /// <param name="action">Action to bind to</param>
         /// <param name="invoker">Custom invoker</param>
+        [Obsolete("Has no effect: delegates are immutable, so binding to a passed Action cannot reach the caller's delegate. Use Bind(UnityEvent<TValue>, UnityAction<TValue>) or subscribe the invoker directly.")]
         public void Bind(Action<TValue> action, Action<TValue> invoker)
         {
 #if !UNITY_2021_1_OR_NEWER
@@ -453,6 +454,7 @@ namespace OmiLAXR.TrackingBehaviours
         /// Removes Action binding.
         /// </summary>
         /// <param name="action">Action to unbind</param>
+        [Obsolete("Has no effect: delegates are immutable, so binding to a passed Action cannot reach the caller's delegate. Use Bind(UnityEvent<TValue>, UnityAction<TValue>) or subscribe the invoker directly.")]
         public void Unbind(Action<TValue> action)
         {
             action -= _actionBinds[action];
@@ -562,6 +564,7 @@ namespace OmiLAXR.TrackingBehaviours
         }
 
         /// <summary>Binds to C# Action with invoker.</summary>
+        [Obsolete("Has no effect: delegates are immutable, so binding to a passed Action cannot reach the caller's delegate. Use Bind(UnityEvent<TValue>, UnityAction<TValue>) or subscribe the invoker directly.")]
         public void Bind(Action<TValue> action, Action<TValue> invoker)
         {
 #if !UNITY_2021_1_OR_NEWER
@@ -575,6 +578,7 @@ namespace OmiLAXR.TrackingBehaviours
         }
         
         /// <summary>Removes Action binding.</summary>
+        [Obsolete("Has no effect: delegates are immutable, so binding to a passed Action cannot reach the caller's delegate. Use Bind(UnityEvent<TValue>, UnityAction<TValue>) or subscribe the invoker directly.")]
         public void Unbind(Action<TValue> action)
         {
             action -= _actionBinds[action];
