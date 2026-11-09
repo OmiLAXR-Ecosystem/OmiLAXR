@@ -1,0 +1,258 @@
+/*
+* SPDX-License-Identifier: AGPL-3.0-or-later
+* Copyright (C) 2025 Sergej Görzen <sergej.goerzen@gmail.com>
+* This file is part of OmiLAXR.
+*/
+
+/* Colors follow the OmiLAXR logo: navy #19274E, blue #2959A5, mid blue #527FC0, light blue #99C9ED.
+   No USS variables or transitions, so the sheet also works in Unity 2020.3. */
+
+.wizard {
+    flex-grow: 1;
+}
+
+/* Header: always light, because the logo text is navy */
+.header {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFFFF;
+    padding: 10px 18px;
+    border-bottom-width: 3px;
+    border-color: #2959A5;
+}
+
+.logo {
+    width: 116px;
+    height: 58px;
+}
+
+.header-text {
+    margin-left: 14px;
+    flex-grow: 1;
+}
+
+.header-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #19274E;
+}
+
+.header-subtitle {
+    font-size: 11px;
+    color: #527FC0;
+}
+
+/* Stepper */
+.stepper {
+    flex-direction: row;
+    padding: 12px 10px 8px 10px;
+}
+
+.step {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+}
+
+.wizard .step-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    border-width: 2px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    font-size: 11px;
+    padding: 0;
+}
+
+.step-label {
+    margin-top: 4px;
+    font-size: 10px;
+    -unity-text-align: middle-center;
+}
+
+.light .step-circle { border-color: #B8C4D6; color: #6B7A90; background-color: #FFFFFF; }
+.dark .step-circle { border-color: #5A6272; color: #A8B0BD; background-color: #2B2F36; }
+
+.step--current .step-circle { border-color: #2959A5; background-color: #2959A5; color: #FFFFFF; }
+.step--ok .step-circle { border-color: #3C9D5D; color: #3C9D5D; }
+.step--warn .step-circle { border-color: #D9822B; color: #D9822B; }
+.step--current .step-label { -unity-font-style: bold; }
+
+/* Page */
+.page {
+    padding: 6px 18px 18px 18px;
+}
+
+.h1 {
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.light .h1 { color: #19274E; }
+.dark .h1 { color: #C1E3F7; }
+
+.h2 {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+
+.light .h2 { color: #2959A5; }
+.dark .h2 { color: #99C9ED; }
+
+.text {
+    white-space: normal;
+    margin-bottom: 4px;
+}
+
+.muted {
+    white-space: normal;
+    font-size: 10px;
+}
+
+.light .muted { color: #6B7A90; }
+.dark .muted { color: #9AA3B0; }
+
+/* Cards */
+.card {
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.light .card { background-color: #FFFFFF; border-color: #D5DDE8; }
+.dark .card { background-color: #2E3238; border-color: #464C56; }
+
+.card-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-right: 8px;
+}
+
+.card-title {
+    -unity-font-style: bold;
+    font-size: 12px;
+}
+
+.card-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.overview {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.overview .card {
+    width: 48%;
+    margin-right: 2%;
+}
+
+/* Badges */
+.badge {
+    border-radius: 8px;
+    padding: 1px 8px;
+    font-size: 10px;
+    margin-right: 6px;
+    -unity-text-align: middle-center;
+}
+
+.badge--ok { background-color: #3C9D5D; color: #FFFFFF; }
+.badge--update { background-color: #2959A5; color: #FFFFFF; }
+.badge--off { background-color: #8A94A3; color: #FFFFFF; }
+.badge--local { background-color: #7E57C2; color: #FFFFFF; }
+
+/* Checks */
+.check {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+}
+
+.light .check { border-color: #EDF1F6; }
+.dark .check { border-color: #3A3F47; }
+
+.check-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+/* Buttons */
+.wizard .btn {
+    padding: 3px 12px;
+    margin: 0 0 0 4px;
+    border-radius: 4px;
+}
+
+.wizard .btn--primary {
+    background-color: #2959A5;
+    color: #FFFFFF;
+    border-color: #224581;
+    -unity-font-style: bold;
+}
+
+.wizard .btn--primary:hover {
+    background-color: #224581;
+}
+
+.wizard .btn--primary:disabled {
+    background-color: #8FA6C8;
+}
+
+.wizard .link {
+    margin-top: 4px;
+    margin-left: 0;
+    padding-left: 0;
+    align-self: flex-start;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    -unity-text-align: middle-left;
+}
+
+.light .link { color: #2959A5; }
+.light .link:hover, .dark .link:hover { -unity-font-style: bold; }
+.dark .link { color: #99C9ED; }
+
+/* Options */
+.option {
+    margin-bottom: 4px;
+}
+
+.field {
+    margin-top: 6px;
+}
+
+/* Footer */
+.footer {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 18px;
+    border-top-width: 1px;
+}
+
+.light .footer { background-color: #F3F6FA; border-color: #D5DDE8; }
+.dark .footer { background-color: #25282D; border-color: #3A3F47; }
+
+.spacer {
+    flex-grow: 1;
+}
+
+.wizard .footer .btn {
+    min-width: 80px;
+    height: 24px;
+}

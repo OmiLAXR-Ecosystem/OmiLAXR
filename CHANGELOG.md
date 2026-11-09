@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.3.0] - 2026-11-09
+
+### Added
+- OmiLAXR Wizard (`OmiLAXR / Open Wizard`): a step-by-step setup window with the OmiLAXR logo, a step bar and Back/Next buttons. It opens once in a new project. Steps:
+  - Required: checks for the scoped registry, pipeline, data provider and credentials file, each with a fix button where possible, and the xAPI data provider package.
+  - Tracking: XR input modules (UnityXR, MetaXR, MRTK2), heart rate with HypeRate, and pseudonyms.
+  - Tools: ReCoPa bridge and app, xAPI4Unity, and other OmiLAXR packages found in the registry.
+  - AI (MCP): writes the OmiLAXR MCP server into `.mcp.json` (Claude Code), `.cursor/mcp.json` (Cursor) and `.vscode/mcp.json` (VS Code). Other servers in these files are kept.
+  - Done: summary and links.
+  Packages are installed, updated and removed through the Package Manager. Local and git packages are shown but left alone.
+- `IWizardSection` (with `WizardStep`) and `WizardCheck` let modules add their own checks and actions to a wizard step. Sections are found via `TypeCache`.
+- `McpConfig` writes the MCP server entry for the supported agents.
+- `ScopedRegistry` reads and adds the OmiLAXR scoped registry in `Packages/manifest.json`. It extends an existing npmjs registry instead of adding a second one.
+- `WizardScene.Contains<T>()` and `WizardScene.Find<T>()` for scene checks across Unity versions.
+- EditMode tests in `Tests/Editor` (assembly `OmiLAXR.Tests.Editor`).
+
+---
+
 ## [2.2.5] - 2026-11-09
 
 ### Added

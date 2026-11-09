@@ -23,7 +23,7 @@ namespace OmiLAXR.Editor
         /// Prevents overwriting existing credentials files and ensures the StreamingAssets folder exists.
         /// </summary>
         [MenuItem("OmiLAXR / Create 'credentials.json' file")]
-        private static void CreateCredentialsFile()
+        internal static void CreateCredentialsFile()
         {
             var destFilePath = Path.Combine(Application.streamingAssetsPath, "credentials.json");
             
@@ -53,7 +53,7 @@ namespace OmiLAXR.Editor
         /// Prevents overwriting existing credentials files and ensures the StreamingAssets folder exists.
         /// </summary>
         [MenuItem("OmiLAXR / Create 'bearer.json' file")]
-        private static void CreateBearerAuthFile()
+        internal static void CreateBearerAuthFile()
         {
             var destFilePath = Path.Combine(Application.streamingAssetsPath, "bearer.json");
             
