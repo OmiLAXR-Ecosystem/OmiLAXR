@@ -36,6 +36,12 @@ How to work in `com.rwth.unity.omilaxr`. Architecture and commands are in `CLAUD
 - License: AGPL-3.0-or-later. Source files start with the SPDX header (copy from a neighbor; `This file is part of OmiLAXR.`).
 - Add or adjust tests in `Tests/` with every behaviour change. Name test files `<Subject>_Tests.cs`, name methods `Subject_Does_Something`, and use `// Arrange / Act / Assert` comments.
 
+## Documentation
+
+- docs.omilaxr.dev is built from the `main` branch of this repo by `OmiLAXR-Ecosystem/docs`. `.github/workflows/docs.yml` asks it to rebuild after a push.
+- Component pages are generated from the code: the class `/// <summary>`, `[AddComponentMenu]`, `[Description]`, events and Inspector fields with `[Tooltip]`. Give every new public component a `<summary>` and its serialized fields a `[Tooltip]`. `make docs-check` lists components without one.
+- Hand-written pages go into `Documentation~/` (no `.meta` files, Unity ignores the folder). `Documentation~/components/<ClassName>.md` is appended to that component's page. `make docs-page NAME=guides/<name>` creates a page, `make docs` previews the site.
+
 ## Core-specific rules
 
 - Every `OmiLAXR.*` module and `OmiLAXR.xAPI` builds on this package. Public and protected members, serialized field names, `[AddComponentMenu]` paths and prefab GUIDs are API. Before changing one, grep the sibling module folders in the workspace for uses.

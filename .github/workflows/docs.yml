@@ -1,0 +1,27 @@
+# Asks the docs site (docs.omilaxr.dev) to rebuild when main changes
+name: Update docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Runtime/**"
+      - "Documentation~/**"
+      - "CHANGELOG.md"
+      - "package.json"
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the docs build
+        env:
+          # Organization secret: a token that may start workflows in OmiLAXR-Ecosystem/docs
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::DOCS_DISPATCH_TOKEN is not set; the docs site picks up this change in its nightly build."
+            exit 0
+          fi
+          gh api repos/OmiLAXR-Ecosystem/docs/dispatches -f event_type=package-updated -f "client_payload[repo]=${{ github.repository }}"

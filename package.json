@@ -5,7 +5,7 @@
   "description": "This is the base package for OmiLAXR ecosystem. This package has shareable code for all OmiLAXR packages.",
   "unity": "2020.3",
   "unityRelease": "15f1",
-  "documentationUrl": "https://omilaxr.dev/",
+  "documentationUrl": "https://docs.omilaxr.dev/core/",
   "changelogUrl": "https://github.com/SGoerzen/OmiLAXR/blob/main/CHANGELOG.md",
   "licensesUrl": "https://github.com/SGoerzen/OmiLAXR/blob/main/LICENSE",
   "homepage": "https://omilaxr.dev/",

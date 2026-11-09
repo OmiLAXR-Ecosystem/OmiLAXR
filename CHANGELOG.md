@@ -15,8 +15,10 @@
 - `ScopedRegistry` reads and adds the OmiLAXR scoped registry in `Packages/manifest.json`. It extends an existing npmjs registry instead of adding a second one.
 - `WizardScene.Contains<T>()` and `WizardScene.Find<T>()` for scene checks across Unity versions.
 - EditMode tests in `Tests/Editor` (assembly `OmiLAXR.Tests.Editor`).
+- `Makefile` with documentation helpers (`make docs`, `docs-check`, `docs-page`, `docs-component`, `docs-publish`). They forward to the docs repo checked out next to the package.
 
 ### Changed
+- `documentationUrl` in `package.json` points to the package reference on docs.omilaxr.dev (`https://docs.omilaxr.dev/core/`). The site is built from this repo: hand-written pages in `Documentation~/`, component pages generated from the source code.
 - Inspector tooltips for the fields of `GazeTrackingBehaviour`, `EyeGazeTrackingBehaviour`, `CameraGazeTrackingBehaviour`, `FacialTrackingBehaviour`, `AreaTrackingBehaviour`, `TransformTrackingBehaviour`, `ScheduledTrackingBehaviour`, `GazeDetectorListener`, `TransformWatcher`, `GlobalSettings` and `Endpoint` (`flushOnStop`), and XML summaries for `AreaListener`, `EyeCalibrator`, `EyeGazeTrackingBehaviour`, `FacialTrackingBehaviour`, `GazeDetectorListener`, `GazeTrackingBehaviour` and `ScheduledTrackingBehaviourTester`. Both appear on the component pages of docs.omilaxr.dev.
 
 ---
