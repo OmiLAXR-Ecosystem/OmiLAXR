@@ -27,10 +27,9 @@ namespace OmiLAXR.Tests.Actors
         [Test]
         public void ActorGroup_Tests_Has_Default_Values()
         {
-            // Assert
-            Assert.AreEqual("Group", _actorGroup.actorName);
-            Assert.AreEqual("group@omilaxr.dev", _actorGroup.actorEmail);
-            Assert.IsEmpty(_actorGroup.GetMembers());  // By default, the members array should be null
+            // Assert (the "Group" defaults are only applied by Reset() when added in the inspector)
+            Assert.IsTrue(_actorGroup.IsGroupActor);
+            Assert.IsEmpty(_actorGroup.GetMembers());
         }
 
         [Test]
