@@ -74,7 +74,7 @@ namespace OmiLAXR.Editor.Wizard
             new WizardModule("com.rwth.unity.omilaxr.xapi4unity", "xAPI4Unity",
                 "Editor tool that turns xAPI JSON definitions into the C# xAPI.Registry the xAPI composers use.",
                 WizardStep.Tools, "xAPI definitions",
-                "Open the xAPI Registry", "https://xapi.elearn.rwth-aachen.de"),
+                "Open the xAPI Registry", "https://omilaxr-ecosystem.github.io/xapi/"),
         };
     }
 }

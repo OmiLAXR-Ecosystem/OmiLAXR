@@ -505,7 +505,7 @@ namespace OmiLAXR.Editor.Wizard
             var links = Css(new VisualElement(), "card");
             links.Add(LinkButton("Documentation (omilaxr.dev)", "https://omilaxr.dev/"));
             links.Add(LinkButton("Get started guide", "https://omilaxr.dev/get-started"));
-            links.Add(LinkButton("xAPI Registry", "https://xapi.elearn.rwth-aachen.de"));
+            links.Add(LinkButton("xAPI Registry", "https://omilaxr-ecosystem.github.io/xapi/"));
             links.Add(LinkButton("Changelog", "https://github.com/SGoerzen/OmiLAXR/blob/main/CHANGELOG.md"));
             page.Add(links);
         }
