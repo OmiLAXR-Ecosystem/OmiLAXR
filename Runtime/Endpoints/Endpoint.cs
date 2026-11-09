@@ -97,7 +97,9 @@ namespace OmiLAXR.Endpoints
         /// </summary>
         protected virtual int MaxBatchSize => 50;
 
-        [Header("Shutdown")] [SerializeField] private bool flushOnStop = true;
+        [Header("Shutdown")]
+        [SerializeField, Tooltip("Send the statements still queued when sending stops, instead of dropping them.")]
+        private bool flushOnStop = true;
 
         [SerializeField,
          Tooltip("Max seconds spent flushing on StopSending (0 = try flush all). For benchmarks use ~0-2s.")]

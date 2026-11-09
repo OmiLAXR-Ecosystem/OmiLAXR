@@ -8,14 +8,21 @@ using UnityEngine;
 
 namespace OmiLAXR.Listeners
 {
+    /// <summary>
+    /// Base class for listeners that turn gaze sources (a camera, an eye, an XR gaze interactor) into trackable objects.
+    /// For every component of type <typeparamref name="T"/> that passes <c>IsCorrectComponent</c>, it adds a
+    /// <see cref="GazeDetector"/>, and optionally a <see cref="FixationDetector"/>, a <see cref="TransformWatcher"/> and a debug ray.
+    /// </summary>
     public abstract class GazeDetectorListener<T> : Listener
     where T : Component
     {
         [Tooltip("Add <TransformWatcher> to gaze game objects.")]
         public bool addTransformWatcher = true;
 
+        [Tooltip("Add a <FixationDetector> to gaze game objects, so fixations are reported.")]
         public bool enableFixation = true;
         
+        [Tooltip("Draws the gaze ray and hit point in the scene for debugging. Off by default.")]
         public GazeDetectorDebug.GazeDetectorDebugSettings
             debugConfig;
         

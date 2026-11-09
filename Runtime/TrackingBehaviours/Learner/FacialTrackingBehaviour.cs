@@ -9,6 +9,11 @@ using UnityEngine;
 
 namespace OmiLAXR.TrackingBehaviours.Learner
 {
+    /// <summary>
+    /// Base class for face tracking of an XR device. On every scheduler tick it reads the face data, reports it,
+    /// and evaluates the configured emotions, raising an event when an emotion becomes active or inactive.
+    /// Device modules implement <c>FetchFaceData</c>.
+    /// </summary>
     public abstract class FacialTrackingBehaviour : ScheduledTrackingBehaviour
     {
         public struct EmotionChangedEvent
@@ -25,7 +30,8 @@ namespace OmiLAXR.TrackingBehaviours.Learner
         [Gesture("Face"), Action("Emotion")] public TrackingBehaviourEvent<EmotionChangedEvent> OnEmotionChanged =
             new TrackingBehaviourEvent<EmotionChangedEvent>();
 
-        [SerializeField] private EmotionLogic[] emotions;
+        [SerializeField, Tooltip("Emotions evaluated on each tick (anger, disgust, fear, happiness, sadness, smile, surprise by default).")]
+        private EmotionLogic[] emotions;
 
         public abstract bool IsAvailable { get; }
         public abstract bool IsEnabled { get; }
@@ -35,6 +41,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner
         public FaceData FaceData { get; private set; }
         private FaceData _lastFaceData;
 
+        [Tooltip("Only report face data when it differs from the previous tick. Disable to report it on every tick.")]
         public bool detectOnChange = true;
         
         // A delegate that knows how to build the provider from FaceData

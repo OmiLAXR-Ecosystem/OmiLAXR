@@ -31,7 +31,7 @@ namespace OmiLAXR
         /// </summary>
         public static GlobalSettings Instance => GetInstance(ref _instance);
 
-        [SerializeField]
+        [SerializeField, Tooltip("Default scheduler for all scheduled tracking behaviours without their own. Falls back to a realtime ticker.")]
         private Scheduler globalScheduler;
 
         public Scheduler GetScheduler()

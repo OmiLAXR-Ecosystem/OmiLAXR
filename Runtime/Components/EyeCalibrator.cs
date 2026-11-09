@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace OmiLAXR.Components
 {
+    /// <summary>
+    /// Base class for the eye tracking calibration of an XR device. On start it calibrates if eye tracking is available
+    /// and not yet calibrated. If eye tracking is unavailable or calibration fails, it can switch from
+    /// <see cref="EyeGazeTrackingBehaviour"/> to <see cref="CameraGazeTrackingBehaviour"/> (<c>fallbackToCameraGaze</c>).
+    /// Device modules implement <c>OnStartCalibration</c> and <c>OnStoppedCalibration</c>.
+    /// </summary>
     public abstract class EyeCalibrator : PipelineComponent, ICalibratable
     {
         

@@ -19,6 +19,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner
         [Gesture("Area"), Action("Leave")]
         public TrackingBehaviourEvent<Area, Vector3> OnLeft = new TrackingBehaviourEvent<Area, Vector3>();
         private List<Area> _areas = new List<Area>();
+        [Tooltip("Transform whose position is checked against the areas. Defaults to the main camera.")]
         public Transform playerTransform;
         protected override void AfterFilteredObjects(Area[] areas)
         {

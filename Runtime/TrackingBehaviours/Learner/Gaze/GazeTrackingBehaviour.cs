@@ -6,6 +6,11 @@ using Object = UnityEngine.Object;
 
 namespace OmiLAXR.TrackingBehaviours.Learner.Gaze
 {
+    /// <summary>
+    /// Base class for gaze tracking. Configures the <see cref="GazeDetector"/>s found by the pipeline (layers, ray distance,
+    /// fixation logic) and reports when the gaze enters, leaves or fixates an object. Subclasses create the gaze data,
+    /// for example <see cref="CameraGazeTrackingBehaviour"/> and <see cref="EyeGazeTrackingBehaviour"/>.
+    /// </summary>
     public abstract class GazeTrackingBehaviour<TGazeData> : ScheduledTrackingBehaviour<GazeDetector>
     where TGazeData : GazeData
     {
@@ -23,10 +28,13 @@ namespace OmiLAXR.TrackingBehaviours.Learner.Gaze
         
         public virtual Transform HmdTransform => Camera.main?.transform;
         
+        [Tooltip("Layers the gaze ray can hit. Objects on other layers are ignored.")]
         public LayerMask layersToInclude = ~0;
         
+        [Tooltip("Maximum length of the gaze ray in meters.")]
         public float rayDistance = 10.0f;
 
+        [Tooltip("Decides when a gaze counts as a fixation. Each gaze detector gets its own copy.")]
         public FixationLogic fixationLogic;
         
         protected abstract TGazeData GenerateGazeData(GazeHit gazeHit);

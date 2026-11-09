@@ -16,6 +16,9 @@
 - `WizardScene.Contains<T>()` and `WizardScene.Find<T>()` for scene checks across Unity versions.
 - EditMode tests in `Tests/Editor` (assembly `OmiLAXR.Tests.Editor`).
 
+### Changed
+- Inspector tooltips for the fields of `GazeTrackingBehaviour`, `EyeGazeTrackingBehaviour`, `CameraGazeTrackingBehaviour`, `FacialTrackingBehaviour`, `AreaTrackingBehaviour`, `TransformTrackingBehaviour`, `ScheduledTrackingBehaviour`, `GazeDetectorListener`, `TransformWatcher`, `GlobalSettings` and `Endpoint` (`flushOnStop`), and XML summaries for `AreaListener`, `EyeCalibrator`, `EyeGazeTrackingBehaviour`, `FacialTrackingBehaviour`, `GazeDetectorListener`, `GazeTrackingBehaviour` and `ScheduledTrackingBehaviourTester`. Both appear on the component pages of docs.omilaxr.dev.
+
 ---
 
 ## [2.2.5] - 2026-11-09

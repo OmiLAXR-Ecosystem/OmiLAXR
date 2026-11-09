@@ -10,6 +10,7 @@ namespace OmiLAXR.TrackingBehaviours.Learner.Gaze
     [Description("Uses camera gaze to detect what object the user is gazing at.")]
     public class CameraGazeTrackingBehaviour : GazeTrackingBehaviour<CameraData>
     {
+        [Tooltip("Camera the gaze ray starts from. Defaults to the main camera.")]
         public Camera originCamera;
         private GazeDetector _gazeDetector;
         protected override void AfterFilteredObjects(GazeDetector[] gazeDetectors)

@@ -10,11 +10,18 @@ using UnityEngine;
 
 namespace OmiLAXR.TrackingBehaviours.Learner.Gaze
 {
+    /// <summary>
+    /// Base class for eye tracking of an XR device. Uses one <see cref="GazeDetector"/> per eye and reports
+    /// fixations (per eye and binocular), saccades and smooth pursuits in addition to gaze enter and leave.
+    /// Device modules provide the eye data and the gaze detectors.
+    /// </summary>
     public abstract class EyeGazeTrackingBehaviour : GazeTrackingBehaviour<EyeData>
     {
         public abstract string DeviceName { get; }
         
+        [Tooltip("Decides when an eye movement counts as a saccade. Defaults to a velocity threshold.")]
         public SaccadeLogic saccadeLogic;
+        [Tooltip("Decides when an eye movement counts as a smooth pursuit of a moving object.")]
         public PursuitLogic pursuitLogic;
 
         /// <summary>
@@ -33,7 +40,9 @@ namespace OmiLAXR.TrackingBehaviours.Learner.Gaze
         private FixationDetector _fixationDetectorLeft;
         private FixationDetector _fixationDetectorRight;
 
+        [Tooltip("Gaze detector of the left eye. Assigned automatically when the pipeline finds the eye gaze detectors.")]
         public GazeDetector leftEyeDetector;
+        [Tooltip("Gaze detector of the right eye. Assigned automatically when the pipeline finds the eye gaze detectors.")]
         public GazeDetector rightEyeDetector;
 
         private class FixationHit

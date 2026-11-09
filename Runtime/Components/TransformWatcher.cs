@@ -18,6 +18,7 @@ namespace OmiLAXR.Components
     [DisallowMultipleComponent]
     public sealed class TransformWatcher : MonoBehaviour
     {
+        [Tooltip("Optional group name. A TransformTrackingBehaviour with a scope only tracks watchers with the same scope.")]
         public string scope;
 
         /// <summary>
@@ -63,6 +64,7 @@ namespace OmiLAXR.Components
             public bool forward;
         }
 
+        [Tooltip("Transform properties this watcher does not report changes for.")]
         public TransformIgnore ignore;
 
         /// <summary>

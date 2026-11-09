@@ -20,6 +20,7 @@ namespace OmiLAXR.TrackingBehaviours
     [Description("Tracks position, rotation and scale changes in a game object holding <TransformWatcher> component.")]
     public class TransformTrackingBehaviour : ScheduledTrackingBehaviour<TransformWatcher>
     {
+        [Tooltip("Only track TransformWatchers with this scope. Empty tracks all of them.")]
         public string scope;
 
         /// <summary>

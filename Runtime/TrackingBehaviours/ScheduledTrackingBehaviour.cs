@@ -19,6 +19,7 @@ namespace OmiLAXR.TrackingBehaviours
     public abstract class ScheduledTrackingBehaviour<T> : TrackingBehaviour<T>
         where T : Component
     {
+        [Tooltip("Decides how often Run is called. Empty uses a copy of the scheduler in GlobalSettings.")]
         public Scheduler scheduler;
 
         protected virtual Scheduler GetDefaultScheduler() => GlobalSettings.Instance.GetScheduler().Clone(this);
